@@ -60,6 +60,9 @@ body {
     .nav-links a:hover {
         color: orange;
     }
+    .nav-links a.login-btn:hover {
+        color: black;
+    }
 
 .login-btn {
     background: orange;
@@ -67,6 +70,11 @@ body {
     border-radius: 20px;
     color: white;
     font-weight: bold;
+}
+
+
+.login-btn:hover {
+    background: #ff7b00;
 }
 
 /* CONTENT */
