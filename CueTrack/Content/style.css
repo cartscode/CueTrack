@@ -12,8 +12,12 @@ body {
 /* HERO */
 .hero {
     height: 100vh;
-    background: url('/Image/background.jpg') no-repeat center center/cover;
+    background-image: url('../Image/background.jpg');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
     position: relative;
+    padding-top: 80px;
 }
 
 /* OVERLAY */
@@ -26,16 +30,17 @@ body {
 
 /* NAVBAR */
 .navbar {
-    position: absolute;
+    position: fixed;
     top: 0;
     width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 20px 50px;
-    z-index: 2;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(6px);
 }
-
 
 .logo {
     display: flex;
@@ -45,10 +50,11 @@ body {
 }
 
 .logo-img {
-    width: 40px; /* adjust size */
+    width: 40px;
     height: auto;
     margin-right: 10px;
 }
+
 .nav-links a {
     margin: 0 15px;
     text-decoration: none;
@@ -60,6 +66,18 @@ body {
     .nav-links a:hover {
         color: orange;
     }
+
+    .nav-links a.active {
+        color: orange;
+        border-bottom: 2px solid orange;
+        padding-bottom: 3px;
+    }
+
+    .nav-links a.login-btn.active {
+        border-bottom: none;
+        color: white;
+    }
+
     .nav-links a.login-btn:hover {
         color: black;
     }
@@ -72,10 +90,9 @@ body {
     font-weight: bold;
 }
 
-
-.login-btn:hover {
-    background: #ff7b00;
-}
+    .login-btn:hover {
+        background: #ff7b00;
+    }
 
 /* CONTENT */
 .content {
@@ -89,7 +106,7 @@ body {
 }
 
     .content h1 {
-         font-family: 'Handelson Two', cursive;
+        font-family: 'Handelson Two', cursive;
         font-size: 60px;
         color: orange;
     }
@@ -108,6 +125,7 @@ body {
         color: #ddd;
     }
 
+/* BUTTON */
 .btn {
     background: orange;
     border: none;
@@ -136,6 +154,7 @@ body {
         transform: translateY(0);
     }
 }
+
 /* MODAL BACKGROUND */
 .modal {
     display: none;
@@ -180,7 +199,201 @@ body {
     border: none;
 }
 
-/* TITLE */
+/* MODAL TITLE */
 .modal-box h2 {
     color: orange;
 }
+
+/* SERVICES SECTION */
+.section {
+    padding: 80px 50px;
+    background: #111;
+    text-align: center;
+}
+
+    .section h2 {
+        font-size: 36px;
+        color: orange;
+        margin-bottom: 40px;
+        font-family: 'Handelson Two', cursive;
+    }
+
+/* CARD CONTAINER */
+.card-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* CARD */
+.card {
+    width: 280px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1c1c1c;
+    transition: 0.3s;
+    cursor: pointer;
+}
+
+/* CARD IMAGE */
+.card-img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+}
+
+/* CARD CONTENT */
+.card-content {
+    padding: 15px;
+    text-align: center;
+}
+
+    .card-content h3 {
+        color: orange;
+        margin-bottom: 10px;
+    }
+
+/* CARD HOVER */
+.card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+/* CONTACT SECTION */
+.section-dark {
+    background: #0d0d0d;
+}
+
+.contact-container {
+    display: flex;
+    justify-content: center;
+}
+
+.contact-info {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    max-width: 700px;
+    width: 100%;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    background: #1c1c1c;
+    padding: 18px 20px;
+    border-radius: 12px;
+    border: 1px solid #2a2a2a;
+    transition: 0.3s;
+}
+
+    .contact-item:hover {
+        border-color: orange;
+    }
+
+.contact-icon {
+    font-size: 24px;
+    margin-top: 2px;
+}
+
+.contact-item h4 {
+    color: orange;
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
+.contact-item p {
+    font-size: 13px;
+    color: #aaa;
+}
+
+/* ABOUT SECTION */
+.about-container {
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.about-text p {
+    font-size: 15px;
+    color: #ccc;
+    line-height: 1.8;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+/* FOOTER */
+.footer {
+    background: #0a0a0a;
+    border-top: 1px solid #222;
+    padding: 50px 60px 20px;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 36px;
+}
+
+.footer-brand {
+    max-width: 220px;
+}
+
+.footer-logo {
+    display: flex;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 10px;
+}
+
+.footer-logo-img {
+    width: 32px;
+    height: auto;
+    margin-right: 8px;
+}
+
+.footer-tagline {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.6;
+}
+
+.footer-links {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+    .footer-links h4 {
+        color: orange;
+        font-size: 14px;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+
+    .footer-links a {
+        color: #888;
+        text-decoration: none;
+        font-size: 13px;
+        transition: 0.2s;
+    }
+
+        .footer-links a:hover {
+            color: orange;
+        }
+
+.footer-bottom {
+    border-top: 1px solid #1a1a1a;
+    padding-top: 16px;
+    text-align: center;
+}
+
+    .footer-bottom p {
+        font-size: 12px;
+        color: #444;
+    }
