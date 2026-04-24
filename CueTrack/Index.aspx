@@ -4,6 +4,7 @@
 <html>
 <head runat="server">
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CueTrack - Home</title>
 
     <!-- CSS -->
@@ -14,6 +15,7 @@
 <body>
 <form id="form1" runat="server">
 
+    <input type="hidden" id="hdnModalState" name="hdnModalState" value="" />
     <!-- AUTH MODAL -->
     <div id="authModal" class="modal">
         <div class="modal-box">
@@ -24,7 +26,10 @@
                 <h2>Login</h2>
                 <asp:TextBox ID="txtLoginEmail" runat="server" CssClass="input" Placeholder="Email"></asp:TextBox>
                 <asp:TextBox ID="txtLoginPassword" runat="server" CssClass="input" TextMode="Password" Placeholder="Password"></asp:TextBox>
-                <asp:Button ID="btnLogin" runat="server" Text="Login" CssClass="btn" />
+                <asp:Button ID="BtnLogin" runat="server" Text="Login"
+    CssClass="btn" OnClick="BtnLogin_Click"
+    OnClientClick="return validateLogin();" />
+
                 <p>Don't have an account?
                     <a href="#" onclick="showRegister(); return false;">Register</a>
                 </p>
@@ -38,7 +43,8 @@
                 <asp:TextBox ID="txtPhoneno" runat="server" CssClass="input" Placeholder="Phone number"></asp:TextBox>
                 <asp:TextBox ID="txtEmail" runat="server" CssClass="input" Placeholder="Email"></asp:TextBox>
                 <asp:TextBox ID="txtPassword" runat="server" CssClass="input" TextMode="Password" Placeholder="Password"></asp:TextBox>
-                <asp:Button ID="btnRegister" runat="server" Text="Register" CssClass="btn" />
+               <asp:Button ID="btnRegister" runat="server" Text="Register"
+    CssClass="btn" OnClick="BtnRegister_Click" />
                 <p>Already have an account?
                     <a href="#" onclick="showLogin(); return false;">Login</a>
                 </p>
@@ -51,19 +57,24 @@
         <div class="overlay"></div>
 
         <!-- NAVBAR -->
-        <div class="navbar">
-            <div class="logo">
-                <img src="Image/great-white-shark.png" class="logo-img" />
-                CueTrack
-            </div>
-            <div class="nav-links">
-                <a href="#home">Home</a>
-                <a href="#services">Services</a>
-                <a href="#contact">Contact Us</a>
-                <a href="#about">About Us</a>
-                <a href="#" class="login-btn" onclick="openLogin(); return false;">LOGIN</a>
-            </div>
-        </div>
+<div class="navbar">
+    <div class="logo">
+        <img src="Image/great-white-shark.png" class="logo-img" />
+        CueTrack
+    </div>
+    <div class="menu-toggle" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+    <div class="nav-links" id="navLinks">
+        <a href="#home" onclick="toggleMenu()">Home</a>
+        <a href="#services" onclick="toggleMenu()">Services</a>
+        <a href="#contact" onclick="toggleMenu()">Contact Us</a>
+        <a href="#about" onclick="toggleMenu()">About Us</a>
+        <a href="#" class="login-btn" onclick="openLogin(); toggleMenu(); return false;">LOGIN</a>
+    </div>
+</div>
 
         <!-- CONTENT -->
         <div class="content">
@@ -113,41 +124,41 @@
     </section>
 
     <!-- CONTACT SECTION -->
-    <section id="contact" class="section section-dark">
-        <h2>Contact Us</h2>
-        <div class="contact-container">
-            <div class="contact-info">
-                <div class="contact-item">
-                    <span class="contact-icon">&#128205;</span>
-                    <div>
-                        <h4>Address</h4>
-                        <p>Sharks Arena, Quezon City, Philippines</p>
+        <section id="contact" class="section section-dark">
+            <h2>Contact Us</h2>
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span class="contact-icon">&#128205;</span>
+                        <div>
+                            <h4>Address</h4>
+                            <p> Sharks Arena, 234 Tomas Morato Ave., Diliman, Quezon City, Philippines</p>
+                        </div>
                     </div>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-icon">&#128222;</span>
-                    <div>
-                        <h4>Phone</h4>
-                        <p>+63 912 345 6789</p>
+                    <div class="contact-item">
+                        <span class="contact-icon">&#128222;</span>
+                        <div>
+                            <h4>Phone</h4>
+                            <p>+63 912 345 6789</p>
+                        </div>
                     </div>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-icon">&#128140;</span>
-                    <div>
-                        <h4>Facebook</h4>
-                        <p>facebook.com/SharksArena</p>
+                    <div class="contact-item">
+                        <span class="contact-icon">&#128140;</span>
+                        <div>
+                            <h4>Facebook</h4>
+                            <p>https://www.facebook.com/sharks.asb/</p>
+                        </div>
                     </div>
-                </div>
-                <div class="contact-item">
-                    <span class="contact-icon">&#128336;</span>
-                    <div>
-                        <h4>Hours</h4>
-                        <p>Open Daily: 10:00 AM – 2:00 AM</p>
+                    <div class="contact-item">
+                        <span class="contact-icon">&#128336;</span>
+                        <div>
+                            <h4>Hours</h4>
+                            <p>Open Daily: 3:00 pm – 5:00 AM</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
 
     <!-- ABOUT SECTION -->
     <section id="about" class="section">
@@ -161,7 +172,7 @@
                 </p>
                 <p>
                     CueTrack is our digital system designed to make your visit seamless —
-                    reserve tables online, order food, and track your game time all in one place.
+                    reserve tables online, and track your game time all in one place.
                 </p>
             </div>
         </div>
@@ -192,9 +203,10 @@
             <!-- RIGHT: Socials -->
             <div class="footer-links">
                 <h4>Follow Us</h4>
-                <a href="#">Facebook</a>
-                <a href="#">Instagram</a>
-                <a href="#">YouTube</a>
+                <a href="https://www.tiktok.com/@sharksbilliardsasso">Tiktok</a>
+                <a href="https://www.facebook.com/sharks.asb/" >Facebook</a>
+                <a href="https://www.instagram.com/sharksbilliardsassociation/">Instagram</a>
+                <a href="https://www.youtube.com/@sharksbilliardsassoc">YouTube</a>
             </div>
 
         </div>
