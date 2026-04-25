@@ -1,0 +1,13 @@
+﻿FOR REGISSTRATION OF CUSTOMER
+
+CREATE TABLE [dbo].[Users] (
+    [UserID]    INT            IDENTITY (1, 1) NOT NULL,
+    [FirstName] NVARCHAR (50)  NOT NULL,
+    [LastName]  NVARCHAR (50)  NOT NULL,
+    [PhoneNo]   NVARCHAR (20)  NOT NULL,
+    [Email]     NVARCHAR (100) NOT NULL,
+    [Password]  NVARCHAR (255) NOT NULL,
+    [CreatedAt] DATETIME       DEFAULT (getdate()) NULL,
+    PRIMARY KEY CLUSTERED ([UserID] ASC),
+    UNIQUE NONCLUSTERED ([Email] ASC)
+);

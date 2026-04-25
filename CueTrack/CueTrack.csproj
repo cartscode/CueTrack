@@ -71,6 +71,7 @@
     <Content Include="Image\background.jpg" />
     <Content Include="Image\great-white-shark.png" />
     <Content Include="Scripts\JavaScript.js" />
+    <Content Include="mysqlcode.txt" />
     <Content Include="Web.config" />
     <Content Include="Index.aspx" />
   </ItemGroup>
