@@ -11,3 +11,29 @@ CREATE TABLE [dbo].[Users] (
     PRIMARY KEY CLUSTERED ([UserID] ASC),
     UNIQUE NONCLUSTERED ([Email] ASC)
 );
+
+For reservation of customers
+
+USE CueTrackDB;  -- make sure you're in the right database
+
+CREATE TABLE Reservations (
+    ReservationID   INT IDENTITY(1,1) PRIMARY KEY,
+    UserID          INT NOT NULL,
+    TableID         INT NOT NULL,
+    ReservationDate DATE NOT NULL,
+    Schedule        VARCHAR(20) NOT NULL,
+    RentalType      VARCHAR(20) NOT NULL DEFAULT 'Rental Time',
+    GuestName       VARCHAR(100) NOT NULL,
+    ContactNo       VARCHAR(20) NOT NULL,
+    GuestCount      INT NOT NULL DEFAULT 1,
+    HasDiscount     BIT NOT NULL DEFAULT 0,
+    Status          VARCHAR(20) NOT NULL DEFAULT 'Pending',
+    CreatedAt       DATETIME NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT FK_Reservations_Users
+        FOREIGN KEY (UserID) REFERENCES Users(UserID)
+);
+
+CREATE UNIQUE INDEX UX_Table_Date_Schedule
+    ON Reservations (TableID, ReservationDate, Schedule)
+    WHERE Status <> 'Cancelled';

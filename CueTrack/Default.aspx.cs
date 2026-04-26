@@ -152,7 +152,7 @@
                                     Session["FirstName"] = reader["FirstName"].ToString();
                                     Session["LastName"] = reader["LastName"].ToString();
 
-                                    Response.Redirect("Dashboard.aspx");
+                                    Response.Redirect("Reservation.aspx");
                                 }
                                 else
                                 {
