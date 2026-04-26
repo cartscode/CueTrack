@@ -42,15 +42,6 @@ namespace CueTrack
         protected global::System.Web.UI.WebControls.Button btnConfirm;
 
         /// <summary>
-        /// txtTime control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtTime;
-
-        /// <summary>
         /// txtDate control.
         /// </summary>
         /// <remarks>
@@ -166,5 +157,14 @@ namespace CueTrack
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.HiddenField hdnStep;
+
+        /// <summary>
+        /// btnLoadSlots control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Button btnLoadSlots;
     }
 }

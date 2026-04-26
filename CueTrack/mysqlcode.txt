@@ -34,6 +34,54 @@ CREATE TABLE Reservations (
         FOREIGN KEY (UserID) REFERENCES Users(UserID)
 );
 
-CREATE UNIQUE INDEX UX_Table_Date_Schedule
+----CREATE UNIQUE INDEX UX_Table_Date_Schedule------
     ON Reservations (TableID, ReservationDate, Schedule)
     WHERE Status <> 'Cancelled';
+
+    -- Returns reserved time slots for a given table and date
+CREATE PROCEDURE sp_GetReservedSlots
+    @TableID INT,
+    @Date    DATE
+AS
+BEGIN
+    SELECT Schedule
+    FROM   Reservations
+    WHERE  TableID = @TableID
+      AND  ReservationDate = @Date
+      AND  Status <> 'Cancelled';
+END
+
+----CREATE PROCEDURE sp_GetReservedTablesForDate-----
+    @Date DATE
+AS
+BEGIN
+    SELECT DISTINCT TableID
+    FROM   Reservations
+    WHERE  ReservationDate = @Date
+      AND  Status <> 'Cancelled';
+END
+
+-------------
+-- Fix sp_GetReservedTablesForDate (was broken by comment syntax)
+
+IF OBJECT_ID('sp_GetReservedTablesForDate', 'P') IS NOT NULL
+    DROP PROCEDURE sp_GetReservedTablesForDate;
+GO
+
+CREATE PROCEDURE sp_GetReservedTablesForDate
+    @Date DATE
+AS
+BEGIN
+    SELECT DISTINCT TableID
+    FROM   Reservations
+    WHERE  ReservationDate = @Date
+      AND  Status <> 'Cancelled';
+END
+GO
+
+-- Confirm sp_GetReservedSlots exists
+IF OBJECT_ID('sp_GetReservedSlots', 'P') IS NOT NULL
+    PRINT 'sp_GetReservedSlots OK'
+ELSE
+    PRINT 'sp_GetReservedSlots MISSING - recreate it';
+GO
