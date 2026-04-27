@@ -55,12 +55,22 @@
         }
         .nav-item:hover { color: white; background: rgba(255,255,255,0.06); }
         .nav-item.active { color: white; border-bottom: 2px solid var(--orange); border-radius: 0; padding-bottom: 4px; }
-        .user-chip {
-            display: flex; align-items: center; gap: 8px;
-            background: var(--orange); color: black;
-            font-weight: 700; font-size: 13px;
-            padding: 6px 14px; border-radius: 20px; cursor: pointer;
-        }
+      .user-chip-wrap { position: relative; }
+
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px); right: 0;
+    background: #1c1c1c;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    min-width: 200px;
+    overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+    z-index: 999;
+}
+
+.user-chip-wrap.open .user-dropdown { display: block; }
         .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
         .hamburger span { width: 24px; height: 3px; background: white; border-radius: 2px; }
         .mobile-menu {
@@ -546,11 +556,234 @@
             .slot-grid  { grid-template-columns: repeat(2, 1fr); }
             .slot-btn   { font-size: 10px; padding: 7px 2px; }
         }
+        /* ── USER CHIP DROPDOWN ── */
+.user-chip-wrap { position: relative; }
+.user-chip { cursor: pointer; user-select: none; transition: background 0.2s; }
+.user-chip:hover { background: var(--orange-hot); }
+.chip-arrow { font-size: 9px; transition: transform 0.2s; }
+.user-chip-wrap.open .chip-arrow { transform: rotate(180deg); }
+
+.user-dropdown {
+    display: none; position: absolute;
+    top: calc(100% + 10px); right: 0;
+    background: #1c1c1c; border: 1px solid var(--border);
+    border-radius: 14px; min-width: 200px; overflow: hidden;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+    z-index: 999; animation: dropIn 0.2s ease;
+}
+.user-chip-wrap.open .user-dropdown { display: block; }
+
+@keyframes dropIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-header {
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,140,0,0.06);
+}
+.dropdown-username {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; font-weight: 800; color: white;
+}
+.dropdown-email { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+.dropdown-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px; font-size: 14px; font-weight: 600;
+    color: var(--text); cursor: pointer; transition: all 0.15s;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.dropdown-item:last-child { border-bottom: none; }
+.dropdown-item:hover { background: rgba(255,255,255,0.06); color: var(--orange); }
+.dropdown-item.danger { color: #e74c3c; }
+.dropdown-item.danger:hover { background: rgba(231,76,60,0.08); }
+
+/* ── MODALS ── */
+.modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.85); z-index: 700;
+    align-items: center; justify-content: center; padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-box {
+    background: #1a1a1a; border: 1px solid var(--border);
+    border-radius: 16px; width: 100%; overflow: hidden;
+    animation: modalPop 0.25s ease;
+}
+@keyframes modalPop {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
+
+.modal-hdr {
+    background: linear-gradient(135deg, var(--orange), var(--orange-hot));
+    padding: 18px 22px;
+    display: flex; align-items: center; justify-content: space-between;
+}
+.modal-hdr.danger { background: linear-gradient(135deg, #c0392b, #e74c3c); }
+.modal-hdr-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 22px; font-weight: 800; color: black; text-transform: uppercase;
+}
+.modal-hdr-sub { font-size: 12px; color: rgba(0,0,0,0.65); font-weight: 600; margin-top: 2px; }
+.modal-x {
+    width: 30px; height: 30px; background: rgba(0,0,0,0.2);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 16px; color: black; font-weight: 900;
+    transition: background 0.2s; flex-shrink: 0;
+}
+.modal-x:hover { background: rgba(0,0,0,0.4); }
+.modal-bdy { padding: 22px; }
+
+/* Settings form */
+.settings-section-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 13px; font-weight: 800; letter-spacing: 1px;
+    color: var(--orange); text-transform: uppercase;
+    margin-bottom: 12px; margin-top: 4px;
+}
+.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.settings-field { display: flex; flex-direction: column; gap: 5px; }
+.settings-field.full { grid-column: 1 / -1; }
+.settings-label {
+    font-size: 11px; font-weight: 700; color: var(--orange);
+    text-transform: uppercase; letter-spacing: 0.5px;
+}
+.settings-input {
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    border-radius: 8px; padding: 10px 12px;
+    color: white; font-family: 'Barlow', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s; width: 100%;
+}
+.settings-input:focus { border-color: var(--orange); background: rgba(255,140,0,0.05); }
+.settings-input:disabled { opacity: 0.5; cursor: not-allowed; }
+.settings-divider { border: none; border-top: 1px solid var(--border); margin: 16px 0; }
+.settings-msg {
+    padding: 10px 14px; border-radius: 8px; font-size: 13px;
+    font-weight: 600; text-align: center; margin-bottom: 14px; display: none;
+}
+.settings-msg.error { background: rgba(231,76,60,0.15); color: #e74c3c; border: 1px solid #e74c3c; }
+.settings-msg.success { background: rgba(39,174,96,0.15); color: #2ecc71; border: 1px solid #2ecc71; }
+
+/* Danger button */
+.btn-danger {
+    background: linear-gradient(135deg,#c0392b,#e74c3c); color: white; border: none;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 17px; font-weight: 800; letter-spacing: 2px;
+    text-transform: uppercase; border-radius: 10px;
+    padding: 13px; cursor: pointer; width: 100%;
+    transition: all 0.2s; box-shadow: 0 4px 20px rgba(192,57,43,0.35);
+}
+.btn-danger:hover { transform: translateY(-2px); }
     </style>
 </head>
 <body>
 <form id="form1" runat="server">
+    <!-- LOGOUT MODAL -->
+<div class="modal-overlay" id="logoutModal">
+    <div class="modal-box" style="max-width:340px;">
+        <div class="modal-hdr danger">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">🚪</span>
+                <div>
+                    <div class="modal-hdr-title">Logout</div>
+                    <div class="modal-hdr-sub">Are you sure you want to sign out?</div>
+                </div>
+            </div>
+            <div class="modal-x" onclick="closeLogout()">✕</div>
+        </div>
+        <div class="modal-bdy">
+            <p style="font-size:14px;color:var(--muted);text-align:center;margin-bottom:20px;">
+                You'll be returned to the login page.
+            </p>
+            <asp:Button ID="btnLogout" runat="server" Text="YES, LOGOUT"
+                CssClass="btn-danger" OnClick="BtnLogout_Click" />
+            <button type="button" class="btn-outline" onclick="closeLogout()">CANCEL</button>
+        </div>
+    </div>
+</div>
 
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="modal-box" style="max-width:460px;max-height:90vh;overflow-y:auto;">
+        <div class="modal-hdr">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">⚙️</span>
+                <div>
+                    <div class="modal-hdr-title">Settings</div>
+                    <div class="modal-hdr-sub">Edit your account information</div>
+                </div>
+            </div>
+            <div class="modal-x" onclick="closeSettings()">✕</div>
+        </div>
+        <div class="modal-bdy">
+            <div class="settings-msg" id="settingsMsg"></div>
+
+            <div class="settings-section-title">Account</div>
+            <div style="margin-bottom:16px;">
+                <label class="settings-label">Email (cannot be changed)</label>
+                <input class="settings-input" disabled id="displayEmail" style="margin-top:5px;" />
+            </div>
+
+            <hr class="settings-divider" />
+
+            <div class="settings-section-title">Personal Info</div>
+            <div class="settings-grid">
+                <div class="settings-field">
+                    <label class="settings-label">First Name</label>
+                    <asp:TextBox ID="txtSettingsFirstName" runat="server"
+                        CssClass="settings-input" placeholder="First name" />
+                </div>
+                <div class="settings-field">
+                    <label class="settings-label">Last Name</label>
+                    <asp:TextBox ID="txtSettingsLastName" runat="server"
+                        CssClass="settings-input" placeholder="Last name" />
+                </div>
+                <div class="settings-field full">
+                    <label class="settings-label">Phone Number</label>
+                    <asp:TextBox ID="txtSettingsPhone" runat="server"
+                        CssClass="settings-input" placeholder="+63 9XX XXX XXXX" />
+                </div>
+            </div>
+
+            <hr class="settings-divider" />
+
+            <div class="settings-section-title">
+                Change Password
+                <span style="font-size:10px;color:var(--muted);font-weight:400;
+                    text-transform:none;">(leave blank to keep current)</span>
+            </div>
+            <div class="settings-grid">
+                <div class="settings-field full">
+                    <label class="settings-label">Current Password</label>
+                    <asp:TextBox ID="txtOldPassword" runat="server"
+                        CssClass="settings-input" TextMode="Password"
+                        placeholder="Enter current password" />
+                </div>
+                <div class="settings-field">
+                    <label class="settings-label">New Password</label>
+                    <asp:TextBox ID="txtNewPassword" runat="server"
+                        CssClass="settings-input" TextMode="Password"
+                        placeholder="New password" />
+                </div>
+                <div class="settings-field">
+                    <label class="settings-label">Confirm New</label>
+                    <input class="settings-input" type="password"
+                        id="txtConfirmPassword" placeholder="Confirm new password" />
+                </div>
+            </div>
+
+            <br/>
+            <asp:Button ID="btnSaveSettings" runat="server" Text="SAVE CHANGES"
+                CssClass="btn-orange" OnClick="BtnSaveSettings_Click"
+                OnClientClick="return validateSettings();" />
+            <button type="button" class="btn-outline" onclick="closeSettings()">CANCEL</button>
+        </div>
+    </div>
+</div>
     <!-- TABLE INFO MODAL -->
     <div class="table-modal-overlay" id="tableModalOverlay" onclick="closeTableModal(event)">
         <div class="table-modal" id="tableModal">
@@ -628,9 +861,24 @@
             <a href="#" class="nav-item">Menu</a>
             <a href="#" class="nav-item">Events</a>
         </div>
-        <div class="user-chip">
-            👤 <asp:Literal ID="litUserName" runat="server" />
+      <div class="user-chip-wrap" id="userChipWrap">
+    <div class="user-chip" onclick="toggleDropdown()">
+        👤 <asp:Literal ID="litUserName" runat="server" />
+        <span class="chip-arrow">▼</span>
+    </div>
+    <div class="user-dropdown" id="userDropdown">
+        <div class="dropdown-header">
+            <div class="dropdown-username"><asp:Literal ID="litUserName2" runat="server" /></div>
+            <div class="dropdown-email"><asp:Literal ID="litUserEmail" runat="server" /></div>
         </div>
+        <div class="dropdown-item" onclick="openSettings()">
+            <span>⚙️</span> Settings
+        </div>
+        <div class="dropdown-item danger" onclick="openLogout()">
+            <span>🚪</span> Logout
+        </div>
+    </div>
+</div>
         <div class="hamburger" onclick="openMobileMenu()">
             <span></span><span></span><span></span>
         </div>
@@ -797,6 +1045,11 @@
     </div>
 
     <!-- Hidden fields -->
+    <asp:HiddenField ID="hdnNewFirstName" runat="server" />
+    <asp:HiddenField ID="hdnNewLastName"  runat="server" />
+    <asp:HiddenField ID="hdnNewPhone"     runat="server" />
+    <asp:HiddenField ID="hdnNewPassword"  runat="server" />
+    <asp:HiddenField ID="hdnOldPassword"  runat="server" />
     <asp:HiddenField ID="hdnTableID"   runat="server" Value="1" />
     <asp:HiddenField ID="hdnTime"      runat="server" />
     <asp:HiddenField ID="hdnDate"      runat="server" />
@@ -812,14 +1065,16 @@
 </form>
 
 <script>
+    var SESSION_EMAIL = '';
+
     var TABLE_INFO = {
-        1: { brand: 'Wolf', series: 'Standard Premium', size: '9ft', slate: '30mm', frame: 'Aluminum + Steel', play: 'Semi-pro', design: '"W" Modern', img: 'Image/table1.jpg' },
-        2: { brand: 'Iron Man', series: 'MR-SUNG', size: '9ft', slate: '30mm', frame: 'Heavy-duty Metal', play: 'Pro', design: 'Industrial/Heavy', img: 'Image/ironman.jpg' },
-        3: { brand: 'Hero', series: 'MR-SUNG', size: '8ft', slate: '30mm', frame: 'Hybrid', play: 'Semi-pro', design: 'Modern Premium', img: 'Image/table3.jpg' },
-        4: { brand: 'Acurra', series: 'MR-SUNG', size: '9ft', slate: '30mm', frame: 'Hybrid', play: 'Semi-pro to Pro', design: 'Clean Minimalist', img: 'Image/table4.jpg' },
-        5: { brand: 'Wolf', series: 'Standard Premium', size: '8ft', slate: '30mm', frame: 'Aluminum + Steel', play: 'Semi-pro', design: '"W" Modern', img: 'Image/table5.jpg' },
-        6: { brand: 'Iron Man', series: 'MR-SUNG', size: '9ft', slate: '30mm', frame: 'Heavy-duty Metal', play: 'Pro', design: 'Industrial/Heavy', img: 'Image/ironman.jpg' },
-        7: { brand: 'Hero', series: 'MR-SUNG', size: '7ft', slate: '30mm', frame: 'Hybrid', play: 'Semi-pro', design: 'Modern Premium', img: 'Image/table7.jpg' },
+        1: { brand: 'Wolf', series: 'Standard Premium', size: '9ft', slate: '30mm', frame: 'Aluminum + Steel', play: 'Semi-pro', img: 'Image/table1.jpg' },
+        2: { brand: 'Iron Man', series: 'MR-SUNG', size: '9ft', slate: '30mm', frame: 'Heavy-duty Metal', play: 'Pro', img: 'Image/ironman.jpg' },
+        3: { brand: 'Hero', series: 'MR-SUNG', size: '8ft', slate: '30mm', frame: 'Hybrid', play: 'Semi-pro', img: 'Image/table3.jpg' },
+        4: { brand: 'Acurra', series: 'MR-SUNG', size: '9ft', slate: '30mm', frame: 'Hybrid', play: 'Semi-pro to Pro', img: 'Image/table4.jpg' },
+        5: { brand: 'Wolf', series: 'Standard Premium', size: '8ft', slate: '30mm', frame: 'Aluminum + Steel', play: 'Semi-pro', img: 'Image/table5.jpg' },
+        6: { brand: 'Iron Man', series: 'MR-SUNG', size: '9ft', slate: '30mm', frame: 'Heavy-duty Metal', play: 'Pro', img: 'Image/ironman.jpg' },
+        7: { brand: 'Hero', series: 'MR-SUNG', size: '7ft', slate: '30mm', frame: 'Hybrid', play: 'Semi-pro', img: 'Image/table7.jpg' },
     };
 
     var tables = [
@@ -839,14 +1094,88 @@
     var selectedTable = parseInt((document.getElementById('hdnTableID') || {}).value) || 1;
     var selectedRental = 'Rental Time';
     var currentStep = 1;
-    var modalTableID = null;   // which table the modal is showing
+    var modalTableID = null;
+    var PROGRESS = { 1: '25%', 2: '50%', 3: '75%', 4: '100%' };
 
-    // Server init
-    if (typeof serverReservedTables !== 'undefined') {
-        serverReservedTables.forEach(function (id) {
-            var t = tables.find(function (x) { return x.id === id; });
-            if (t) t.fullyReserved = true;
+    // ── DROPDOWN ───────────────────────────────────────────────
+    function toggleDropdown() {
+        var wrap = document.getElementById('userChipWrap');
+        if (!wrap) return;
+        wrap.classList.toggle('open');
+    }
+
+    // ── LOGOUT MODAL ───────────────────────────────────────────
+    function openLogout() {
+        var wrap = document.getElementById('userChipWrap');
+        if (wrap) wrap.classList.remove('open');
+        document.getElementById('logoutModal').classList.add('open');
+    }
+    function closeLogout() {
+        document.getElementById('logoutModal').classList.remove('open');
+    }
+
+    // ── SETTINGS MODAL ─────────────────────────────────────────
+    function openSettings() {
+        var wrap = document.getElementById('userChipWrap');
+        if (wrap) wrap.classList.remove('open');
+        var emailEl = document.getElementById('displayEmail');
+        if (emailEl) emailEl.value = SESSION_EMAIL || '';
+        ['txtOldPassword', 'txtNewPassword'].forEach(function (id) {
+            var el = document.querySelector('[id$="' + id + '"]');
+            if (el) el.value = '';
         });
+        var conf = document.getElementById('txtConfirmPassword');
+        if (conf) conf.value = '';
+        var msg = document.getElementById('settingsMsg');
+        if (msg) { msg.style.display = 'none'; msg.textContent = ''; }
+        document.getElementById('settingsModal').classList.add('open');
+    }
+    function closeSettings() {
+        document.getElementById('settingsModal').classList.remove('open');
+    }
+
+    function validateSettings() {
+        var fn = document.querySelector('[id$="txtSettingsFirstName"]');
+        var ln = document.querySelector('[id$="txtSettingsLastName"]');
+        var ph = document.querySelector('[id$="txtSettingsPhone"]');
+        var np = document.querySelector('[id$="txtNewPassword"]');
+        var op = document.querySelector('[id$="txtOldPassword"]');
+        var cp = document.getElementById('txtConfirmPassword');
+
+        if (!fn || !fn.value.trim()) { showSettingsError('First name is required.'); return false; }
+        if (!ln || !ln.value.trim()) { showSettingsError('Last name is required.'); return false; }
+        if (!ph || !ph.value.trim()) { showSettingsError('Phone is required.'); return false; }
+
+        if (np && np.value.trim()) {
+            if (np.value.length < 6) { showSettingsError('New password must be at least 6 characters.'); return false; }
+            if (cp && np.value !== cp.value) { showSettingsError('Passwords do not match.'); return false; }
+            if (!op || !op.value.trim()) { showSettingsError('Enter your current password.'); return false; }
+        }
+
+        setHdn('hdnNewFirstName', fn ? fn.value.trim() : '');
+        setHdn('hdnNewLastName', ln ? ln.value.trim() : '');
+        setHdn('hdnNewPhone', ph ? ph.value.trim() : '');
+        setHdn('hdnNewPassword', np ? np.value.trim() : '');
+        setHdn('hdnOldPassword', op ? op.value.trim() : '');
+        return true;
+    }
+
+    function showSettingsError(msg) {
+        var el = document.getElementById('settingsMsg');
+        if (!el) return;
+        el.className = 'settings-msg error';
+        el.textContent = msg;
+        el.style.display = 'block';
+    }
+
+    function showSettingsSuccess() {
+        var el = document.getElementById('settingsMsg');
+        if (el) {
+            el.className = 'settings-msg success';
+            el.textContent = '✓ Changes saved successfully!';
+            el.style.display = 'block';
+        }
+        document.getElementById('settingsModal').classList.add('open');
     }
 
     // ── POOL TABLE SVG ─────────────────────────────────────────
@@ -884,7 +1213,7 @@
 
             var imgHTML = info.img
                 ? '<img src="' + info.img + '" style="width:100%;height:100%;object-fit:cover;border-radius:8px;" '
-                + 'onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'" />'
+                + 'onerror="this.style.display=\'none\';this.nextSibling.style.display=\'block\'"/>'
                 + '<div style="display:none;width:100%;height:100%;">' + poolSVG(true) + '</div>'
                 : poolSVG(true);
 
@@ -903,11 +1232,7 @@
                 e.stopPropagation();
                 openTableModal(t.id);
             });
-
-            if (!t.fullyReserved) {
-                card.addEventListener('click', function () { pickTable(t.id); });
-            }
-
+            if (!t.fullyReserved) card.addEventListener('click', function () { pickTable(t.id); });
             grid.appendChild(card);
         });
     }
@@ -928,11 +1253,9 @@
         document.getElementById('modalFrame').textContent = info.frame || '—';
         document.getElementById('modalPlay').textContent = info.play || '—';
 
-        // Real photo in modal header (falls back to SVG if image missing)
         var svgEl = document.getElementById('modalTableSvg');
         if (info.img) {
-            svgEl.innerHTML = '<img src="' + info.img + '" '
-                + 'style="width:100%;height:100%;object-fit:cover;border-radius:6px;" '
+            svgEl.innerHTML = '<img src="' + info.img + '" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" '
                 + 'onerror="this.outerHTML=\'' + poolSVG(true).replace(/'/g, "\\'") + '\'"/>';
         } else {
             svgEl.innerHTML = poolSVG(true);
@@ -943,33 +1266,30 @@
         var note = document.getElementById('modalNote');
 
         if (isReserved) {
-            badge.textContent = 'All Slots Taken';
-            badge.className = 'status-badge status-taken';
-            btn.disabled = true;
-            note.textContent = 'This table is fully booked. Please choose another.';
+            badge.textContent = 'All Slots Taken'; badge.className = 'status-badge status-taken';
+            btn.disabled = true; note.textContent = 'This table is fully booked.';
         } else if (id === selectedTable) {
-            badge.textContent = 'Currently Selected';
-            badge.className = 'status-badge status-available';
-            btn.disabled = false;
-            btn.textContent = '✓ ALREADY SELECTED';
+            badge.textContent = 'Currently Selected'; badge.className = 'status-badge status-available';
+            btn.disabled = false; btn.textContent = '✓ ALREADY SELECTED';
             note.textContent = 'This is your currently selected table.';
         } else {
-            badge.textContent = 'Available';
-            badge.className = 'status-badge status-available';
-            btn.disabled = false;
-            btn.textContent = '✓ SELECT THIS TABLE';
-            note.textContent = 'Click below to select this table for your reservation.';
+            badge.textContent = 'Available'; badge.className = 'status-badge status-available';
+            btn.disabled = false; btn.textContent = '✓ SELECT THIS TABLE';
+            note.textContent = 'Click below to select this table.';
         }
-
         document.getElementById('tableModalOverlay').classList.add('open');
+    }
+
+    function closeTableModal(e) {
+        if (!e || e.target === document.getElementById('tableModalOverlay'))
+            document.getElementById('tableModalOverlay').classList.remove('open');
+        modalTableID = null;
     }
 
     function selectFromModal() {
         if (modalTableID) {
             var t = tables.find(function (x) { return x.id === modalTableID; });
-            if (t && !t.fullyReserved) {
-                pickTable(modalTableID);
-            }
+            if (t && !t.fullyReserved) pickTable(modalTableID);
         }
         document.getElementById('tableModalOverlay').classList.remove('open');
         modalTableID = null;
@@ -985,8 +1305,6 @@
         renderGrid();
         var date = valEl('txtDate');
         if (date) fetchSlots(id, date);
-
-        // Auto-scroll to inputs on mobile
         if (window.innerWidth <= 768) {
             var panel = document.querySelector('.right-panel');
             if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -998,8 +1316,7 @@
         var old = preview.querySelector('svg');
         if (old) old.remove();
         preview.insertAdjacentHTML('afterbegin', poolSVG(false));
-        document.getElementById('panelReservedOverlay')
-            .classList.toggle('show', t && t.fullyReserved);
+        document.getElementById('panelReservedOverlay').classList.toggle('show', t && t.fullyReserved);
     }
 
     // ── TIME SLOTS ─────────────────────────────────────────────
@@ -1010,12 +1327,9 @@
             var btn = document.createElement('div');
             var taken = takenSlots.indexOf(slot) !== -1;
             var sel = slot === selectedSlot && !taken;
-            btn.className = 'slot-btn'
-                + (taken ? ' slot-taken' : '')
-                + (sel ? ' slot-selected' : '');
+            btn.className = 'slot-btn' + (taken ? ' slot-taken' : '') + (sel ? ' slot-selected' : '');
             if (taken) {
-                btn.innerHTML =
-                    '<span style="display:block;font-size:13px">' + slot + '</span>'
+                btn.innerHTML = '<span style="display:block;font-size:13px">' + slot + '</span>'
                     + '<span style="display:block;font-size:10px;margin-top:1px;color:#ff6b6b">Reserved</span>';
                 btn.title = slot + ' is already reserved';
             } else {
@@ -1058,8 +1372,6 @@
     }
 
     // ── STEP NAV ───────────────────────────────────────────────
-    var PROGRESS = { 1: '25%', 2: '50%', 3: '75%', 4: '100%' };
-
     function goStep(n) {
         document.getElementById('hdnTableID').value = selectedTable;
         if (n > currentStep) {
@@ -1158,17 +1470,20 @@
     }
 
     // ── HELPERS ────────────────────────────────────────────────
-    function valEl(id) {
-        var el = document.querySelector('[id$="' + id + '"]');
-        return el ? el.value.trim() : '';
-    }
+    function valEl(id) { var el = document.querySelector('[id$="' + id + '"]'); return el ? el.value.trim() : ''; }
     function setText(id, text) { var el = document.getElementById(id); if (el) el.textContent = text; }
     function setHdn(id, value) { var el = document.getElementById(id); if (el) el.value = value; }
     function getHdn(id) { var el = document.getElementById(id); return el ? el.value : ''; }
 
     // ── INIT ───────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
-        // Restore state from hidden fields (survives postback)
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function (e) {
+            var wrap = document.getElementById('userChipWrap');
+            if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
+        });
+
+        // Restore state from hidden fields
         var hdnTable = document.getElementById('hdnTableID');
         var hdnTime = document.getElementById('hdnTime');
         var hdnStepEl = document.getElementById('hdnStep');
@@ -1176,12 +1491,21 @@
         var hdnDiscountEl = document.getElementById('hdnDiscount');
 
         if (hdnTable && hdnTable.value) selectedTable = parseInt(hdnTable.value) || 1;
-        if (hdnTime && hdnTime.value) { selectedSlot = hdnTime.value; var td = document.getElementById('timeDisplay'); if (td) td.textContent = selectedSlot; }
+        if (hdnTime && hdnTime.value) {
+            selectedSlot = hdnTime.value;
+            var td = document.getElementById('timeDisplay');
+            if (td) td.textContent = selectedSlot;
+        }
         if (hdnRentalEl && hdnRentalEl.value) { selectedRental = hdnRentalEl.value; selectRental(selectedRental); }
         if (hdnDiscountEl) { var tog = document.getElementById('discountToggle'); if (tog) tog.checked = hdnDiscountEl.value === '1'; }
 
-        // Server init slots
         if (typeof serverInitSlots !== 'undefined') takenSlots = serverInitSlots;
+        if (typeof serverReservedTables !== 'undefined') {
+            serverReservedTables.forEach(function (id) {
+                var t = tables.find(function (x) { return x.id === id; });
+                if (t) t.fullyReserved = true;
+            });
+        }
 
         renderGrid();
         renderSlots();
@@ -1189,14 +1513,12 @@
         updatePanelPreview(t || tables[0]);
         document.getElementById('panelTableNum').textContent = selectedTable;
 
-        // Date min + change listener
         var d = document.querySelector('[id$="txtDate"]');
         if (d) {
             d.min = new Date().toISOString().split('T')[0];
             d.addEventListener('change', function () { if (this.value) fetchSlots(selectedTable, this.value); });
         }
 
-        // Restore step
         if (hdnStepEl) {
             var s = parseInt(hdnStepEl.value) || 1;
             if (s === 4) { showSuccess(); }
