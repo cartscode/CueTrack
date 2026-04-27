@@ -85,3 +85,20 @@ IF OBJECT_ID('sp_GetReservedSlots', 'P') IS NOT NULL
 ELSE
     PRINT 'sp_GetReservedSlots MISSING - recreate it';
 GO
+
+
+____________Cashier_____________________
+
+CREATE TABLE [dbo].[Cashiers] (
+    [CashierID] INT            IDENTITY (1, 1) NOT NULL,
+    [FirstName] NVARCHAR (50)  NOT NULL,
+    [LastName]  NVARCHAR (50)  NOT NULL,
+    [PhoneNo]   NVARCHAR (20)  NOT NULL,
+    [Email]     NVARCHAR (100) NOT NULL,
+    [Password]  NVARCHAR (255) NOT NULL,
+    [IsActive]  BIT            NOT NULL DEFAULT 1,
+    [CreatedAt] DATETIME       NOT NULL DEFAULT GETDATE(),
+    PRIMARY KEY CLUSTERED ([CashierID] ASC),
+    UNIQUE NONCLUSTERED ([Email] ASC)
+);
+GO
