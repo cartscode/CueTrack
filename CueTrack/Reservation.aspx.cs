@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlClient;
 using System.Configuration;
 using System.Security.Cryptography;
@@ -16,7 +15,6 @@ namespace CueTrack
 
         protected void Page_Load(object sender, EventArgs e)
         {
-            // ── Auth guard ───────────────────────────────────
             if (Session["UserID"] == null)
             {
                 Response.Redirect("Default.aspx");
@@ -30,47 +28,44 @@ namespace CueTrack
                 string email = Session["Email"]?.ToString() ?? "";
                 string phone = Session["PhoneNo"]?.ToString() ?? "";
 
-                // Navbar
                 litUserName.Text = firstName;
                 litUserName2.Text = firstName + " " + lastName;
                 litUserEmail.Text = email;
 
-                // Settings modal pre-fill
                 txtSettingsFirstName.Text = firstName;
                 txtSettingsLastName.Text = lastName;
                 txtSettingsPhone.Text = phone;
 
-                // Emit session email to JS for settings modal
                 string safeEmail = email.Replace("'", "\\'");
                 ScriptManager.RegisterStartupScript(this, GetType(), "sessionEmail",
                     $"var SESSION_EMAIL = '{safeEmail}';", true);
 
-                // Reserved tables for today
+                // First load: Table 1 + today
                 string today = DateTime.Today.ToString("yyyy-MM-dd");
-                var reservedTables = GetReservedTablesForDate(today);
-                string tablesJs = $"var serverReservedTables = [{string.Join(",", reservedTables)}];";
-
-                // Pre-load slots for Table 1 + today
                 var initSlots = GetReservedSlotsForTable(1, today);
-                string slotsJson = "[" + string.Join(",",
-                    initSlots.ConvertAll(s => "\"" + s.Trim() + "\"")) + "]";
-                string slotsJs = $"var serverInitSlots = {slotsJson};";
-
-                ScriptManager.RegisterStartupScript(this, GetType(), "initData",
-                    tablesJs + slotsJs, true);
+                string slotsJson = ToJsonArray(initSlots);
+                ScriptManager.RegisterStartupScript(this, GetType(), "initSlots",
+                    $"var serverInitSlots = {slotsJson};", true);
             }
             else
             {
-                // Restore step 4 success screen after postback
+                // ✅ REMOVED slot re-emit from here — BtnLoadSlots_Click handles it
+                // Only handle step 4 restore
                 if (hdnStep.Value == "4")
                 {
                     ScriptManager.RegisterStartupScript(this, GetType(), "restoreSuccess",
                         "showSuccess();", true);
                 }
             }
+
+            // Always re-emit reserved tables
+            string todayStr = DateTime.Today.ToString("yyyy-MM-dd");
+            var reservedTables = GetReservedTablesForDate(todayStr);
+            string tablesJs = $"var serverReservedTables = [{string.Join(",", reservedTables)}];";
+            ScriptManager.RegisterStartupScript(this, GetType(), "reservedTables", tablesJs, true);
         }
 
-        // ── LOAD TIME SLOTS ────────────────────────────────────
+        // ── LOAD TIME SLOTS (date change) ──────────────────────
         protected void BtnLoadSlots_Click(object sender, EventArgs e)
         {
             string tableID = hdnTableID.Value;
@@ -80,14 +75,12 @@ namespace CueTrack
                 return;
 
             var taken = GetReservedSlotsForTable(int.Parse(tableID), date);
+            string slotsJson = ToJsonArray(taken);
 
-            string slotsJson = "[" + string.Join(",",
-                taken.ConvertAll(s => "\"" + s.Trim() + "\"")) + "]";
-
-            ScriptManager.RegisterStartupScript(this, GetType(),
-                "loadSlots",
-                $"loadReservedSlots({slotsJson});",
-                true);
+            // ✅ Set BOTH the variable AND call the function
+            // The variable is read by DOMContentLoaded, the function call re-renders after postback
+            ScriptManager.RegisterStartupScript(this, GetType(), "initSlots",
+                $"var serverInitSlots = {slotsJson}; loadReservedSlots({slotsJson});", true);
         }
 
         // ── CONFIRM BOOKING ────────────────────────────────────
@@ -100,7 +93,7 @@ namespace CueTrack
             string guestName = hdnGuestName.Value;
             string contact = hdnContact.Value;
             string guests = hdnGuests.Value;
-             bool discount = hdnDiscount.Value == "1";
+            bool discount = hdnDiscount.Value == "1";
             string userID = Session["UserID"].ToString();
 
             if (string.IsNullOrEmpty(tableID) || string.IsNullOrEmpty(time) ||
@@ -117,7 +110,6 @@ namespace CueTrack
                 {
                     conn.Open();
 
-                    // Double-booking check
                     string checkQ = @"
                         SELECT COUNT(*) FROM Reservations
                         WHERE  TableID         = @TableID
@@ -130,7 +122,6 @@ namespace CueTrack
                         chk.Parameters.AddWithValue("@TableID", int.Parse(tableID));
                         chk.Parameters.AddWithValue("@Date", date);
                         chk.Parameters.AddWithValue("@Time", time);
-
                         if ((int)chk.ExecuteScalar() > 0)
                         {
                             ShowAlert("That time slot is already taken. Please choose another.");
@@ -138,7 +129,6 @@ namespace CueTrack
                         }
                     }
 
-                    // Insert reservation
                     string insertQ = @"
                         INSERT INTO Reservations
                             (UserID, TableID, ReservationDate, Schedule,
@@ -200,7 +190,6 @@ namespace CueTrack
 
                     if (!string.IsNullOrEmpty(newPass))
                     {
-                        // Verify old password first
                         if (string.IsNullOrEmpty(oldPass))
                         {
                             ScriptManager.RegisterStartupScript(this, GetType(), "settingsErr",
@@ -223,10 +212,7 @@ namespace CueTrack
                         }
 
                         string hashedNew = HashPassword(newPass);
-                        string updQ = @"UPDATE Users
-                                        SET FirstName=@FN, LastName=@LN,
-                                            PhoneNo=@PH, Password=@PW
-                                        WHERE UserID=@ID";
+                        string updQ = @"UPDATE Users SET FirstName=@FN,LastName=@LN,PhoneNo=@PH,Password=@PW WHERE UserID=@ID";
                         using (SqlCommand upd = new SqlCommand(updQ, conn))
                         {
                             upd.Parameters.AddWithValue("@FN", firstName);
@@ -239,9 +225,7 @@ namespace CueTrack
                     }
                     else
                     {
-                        string updQ = @"UPDATE Users
-                                        SET FirstName=@FN, LastName=@LN, PhoneNo=@PH
-                                        WHERE UserID=@ID";
+                        string updQ = @"UPDATE Users SET FirstName=@FN,LastName=@LN,PhoneNo=@PH WHERE UserID=@ID";
                         using (SqlCommand upd = new SqlCommand(updQ, conn))
                         {
                             upd.Parameters.AddWithValue("@FN", firstName);
@@ -253,12 +237,10 @@ namespace CueTrack
                     }
                 }
 
-                // Update session
                 Session["FirstName"] = firstName;
                 Session["LastName"] = lastName;
                 Session["PhoneNo"] = phone;
 
-                // Refresh navbar literals
                 litUserName.Text = firstName;
                 litUserName2.Text = firstName + " " + lastName;
                 txtSettingsFirstName.Text = firstName;
@@ -270,10 +252,7 @@ namespace CueTrack
             }
             catch (Exception ex)
             {
-                string safeMsg = ex.Message
-                    .Replace("'", "\\'")
-                    .Replace("\r", "")
-                    .Replace("\n", "");
+                string safeMsg = ex.Message.Replace("'", "\\'").Replace("\r", "").Replace("\n", "");
                 ScriptManager.RegisterStartupScript(this, GetType(), "settingsErr",
                     $"showSettingsError('Error: {safeMsg}');", true);
             }
@@ -287,7 +266,7 @@ namespace CueTrack
             Response.Redirect("Default.aspx");
         }
 
-        // ── GET RESERVED SLOTS ─────────────────────────────────
+        // ── HELPERS ────────────────────────────────────────────
         private List<string> GetReservedSlotsForTable(int tableID, string date)
         {
             var list = new List<string>();
@@ -301,14 +280,12 @@ namespace CueTrack
                         WHERE  TableID = @TableID
                           AND  CONVERT(DATE, ReservationDate) = CONVERT(DATE, @Date)
                           AND  Status <> 'Cancelled'";
-
                     using (SqlCommand cmd = new SqlCommand(q, conn))
                     {
                         cmd.Parameters.AddWithValue("@TableID", tableID);
                         cmd.Parameters.AddWithValue("@Date", date);
-                        using (SqlDataReader r = cmd.ExecuteReader())
-                            while (r.Read())
-                                list.Add(r.GetString(0).Trim());
+                        using (var r = cmd.ExecuteReader())
+                            while (r.Read()) list.Add(r.GetString(0).Trim());
                     }
                 }
             }
@@ -319,7 +296,6 @@ namespace CueTrack
             return list;
         }
 
-        // ── GET FULLY-RESERVED TABLES ──────────────────────────
         private List<int> GetReservedTablesForDate(string date)
         {
             var list = new List<int>();
@@ -329,19 +305,16 @@ namespace CueTrack
                 {
                     conn.Open();
                     string q = @"
-                        SELECT TableID
-                        FROM   Reservations
+                        SELECT TableID FROM Reservations
                         WHERE  CONVERT(DATE, ReservationDate) = CONVERT(DATE, @Date)
                           AND  Status <> 'Cancelled'
                         GROUP  BY TableID
                         HAVING COUNT(*) >= 15";
-
                     using (SqlCommand cmd = new SqlCommand(q, conn))
                     {
                         cmd.Parameters.AddWithValue("@Date", date);
-                        using (SqlDataReader r = cmd.ExecuteReader())
-                            while (r.Read())
-                                list.Add(r.GetInt32(0));
+                        using (var r = cmd.ExecuteReader())
+                            while (r.Read()) list.Add(r.GetInt32(0));
                     }
                 }
             }
@@ -352,27 +325,27 @@ namespace CueTrack
             return list;
         }
 
-        // ── HASH PASSWORD ──────────────────────────────────────
+        private string ToJsonArray(List<string> items)
+        {
+            return "[" + string.Join(",", items.ConvertAll(s => "\"" + s.Trim() + "\"")) + "]";
+        }
+
         private string HashPassword(string password)
         {
             using (var sha256 = SHA256.Create())
             {
                 byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
                 var sb = new StringBuilder();
-                foreach (byte b in bytes)
-                    sb.Append(b.ToString("x2"));
+                foreach (byte b in bytes) sb.Append(b.ToString("x2"));
                 return sb.ToString();
             }
         }
 
-        // ── SHOW ALERT ─────────────────────────────────────────
         private void ShowAlert(string msg)
         {
-            msg = msg.Replace("'", "\\'")
-                     .Replace("\r", "")
-                     .Replace("\n", "");
-            ScriptManager.RegisterStartupScript(this, GetType(),
-                "alert", $"alert('{msg}');", true);
+            msg = msg.Replace("'", "\\'").Replace("\r", "").Replace("\n", "");
+            ScriptManager.RegisterStartupScript(this, GetType(), "alert",
+                $"alert('{msg}');", true);
         }
     }
 }

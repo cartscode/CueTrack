@@ -1475,15 +1475,12 @@
     function setHdn(id, value) { var el = document.getElementById(id); if (el) el.value = value; }
     function getHdn(id) { var el = document.getElementById(id); return el ? el.value : ''; }
 
-    // ── INIT ───────────────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', function () {
-        // Close dropdown when clicking outside
         document.addEventListener('click', function (e) {
             var wrap = document.getElementById('userChipWrap');
             if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
         });
 
-        // Restore state from hidden fields
         var hdnTable = document.getElementById('hdnTableID');
         var hdnTime = document.getElementById('hdnTime');
         var hdnStepEl = document.getElementById('hdnStep');
@@ -1497,14 +1494,24 @@
             if (td) td.textContent = selectedSlot;
         }
         if (hdnRentalEl && hdnRentalEl.value) { selectedRental = hdnRentalEl.value; selectRental(selectedRental); }
-        if (hdnDiscountEl) { var tog = document.getElementById('discountToggle'); if (tog) tog.checked = hdnDiscountEl.value === '1'; }
+        if (hdnDiscountEl) {
+            var tog = document.getElementById('discountToggle');
+            if (tog) tog.checked = hdnDiscountEl.value === '1';
+        }
 
-        if (typeof serverInitSlots !== 'undefined') takenSlots = serverInitSlots;
+        // ✅ serverReservedTables always set by server
         if (typeof serverReservedTables !== 'undefined') {
             serverReservedTables.forEach(function (id) {
                 var t = tables.find(function (x) { return x.id === id; });
                 if (t) t.fullyReserved = true;
             });
+        }
+
+        // ✅ serverInitSlots set on first load OR after BtnLoadSlots postback
+        // On BtnLoadSlots postback, loadReservedSlots() fires AFTER this block via RegisterStartupScript
+        // so we just seed takenSlots here for the initial render
+        if (typeof serverInitSlots !== 'undefined') {
+            takenSlots = serverInitSlots;
         }
 
         renderGrid();
@@ -1516,7 +1523,9 @@
         var d = document.querySelector('[id$="txtDate"]');
         if (d) {
             d.min = new Date().toISOString().split('T')[0];
-            d.addEventListener('change', function () { if (this.value) fetchSlots(selectedTable, this.value); });
+            d.addEventListener('change', function () {
+                if (this.value) fetchSlots(selectedTable, this.value);
+            });
         }
 
         if (hdnStepEl) {
