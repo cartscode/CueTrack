@@ -104,8 +104,8 @@ window.addEventListener('scroll', function () {
 function toggleMenu() {
     var nav = document.getElementById('navLinks');
     var spans = document.querySelectorAll('.menu-toggle span');
-    nav.classList.toggle('open');
+    nav.classList.toggle('active');   // ← was 'open', must match CSS class .nav-links.active
     spans.forEach(function (span) {
-        span.classList.toggle('open');
+        span.classList.toggle('active');  // ← was 'open'
     });
 }
