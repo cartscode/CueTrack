@@ -903,6 +903,14 @@
                     <div class="legend-item"><div class="legend-dot dot-selected"></div> Selected</div>
                     <div class="legend-item"><div class="legend-dot dot-reserved"></div> All slots taken</div>
                 </div>
+                <!-- TIME LIMIT NOTICE -->
+<div id="timeNoticeBox" class="time-notice time-notice-warning" style="display:none;">
+    <div class="time-notice-icon">⚠️</div>
+    <div>
+        <div class="time-notice-title" id="timeNoticeTitle"></div>
+        <div class="time-notice-msg" id="timeNoticeMsg"></div>
+    </div>
+</div>
                 <br/>
                 <button type="button" class="btn-orange" onclick="goStep(2)">CONTINUE</button>
             </div>
@@ -1341,11 +1349,63 @@
         });
     }
 
+    // ── TIME LIMIT CHECK ───────────────────────────────────────
+    function checkTimeLimit(slot) {
+        if (selectedRental !== 'Open Time') return; // only matters for Open Time
+
+        var idx = ALL_SLOTS.indexOf(slot);
+        if (idx === -1) return;
+
+        // Find the next taken slot after the selected one
+        for (var i = idx + 1; i < ALL_SLOTS.length; i++) {
+            if (takenSlots.indexOf(ALL_SLOTS[i]) !== -1) {
+                var hoursLimit = i - idx;
+                var nextSlot = ALL_SLOTS[i];
+                showTimeNotice(
+                    'Time Limit Notice',
+                    'Another reservation exists at <strong>' + nextSlot + '</strong>. ' +
+                    'Your Open Time session will be limited to <strong>' + hoursLimit +
+                    ' hour' + (hoursLimit > 1 ? 's' : '') + '</strong>.',
+                    'warning'
+                );
+                return;
+            }
+        }
+        // No conflict — clear any existing notice
+        clearTimeNotice();
+    }
+
+    function showTimeNotice(title, message, type) {
+        var box = document.getElementById('timeNoticeBox');
+        if (!box) return;
+        box.className = 'time-notice time-notice-' + type;
+        document.getElementById('timeNoticeTitle').textContent = title;
+        document.getElementById('timeNoticeMsg').innerHTML = message;
+        box.style.display = 'flex';
+    }
+
+    function clearTimeNotice() {
+        var box = document.getElementById('timeNoticeBox');
+        if (box) box.style.display = 'none';
+    }
+
+    // ── PICK SLOT (updated) ────────────────────────────────────
     function pickSlot(slot) {
         selectedSlot = slot;
         document.getElementById('timeDisplay').textContent = slot;
         document.getElementById('hdnTime').value = slot;
         renderSlots();
+        checkTimeLimit(slot); // ✅ check after selecting
+    }
+
+    // ── RENTAL SELECTION (updated to recheck on type change) ───
+    function selectRental(type) {
+        selectedRental = type;
+        document.getElementById('rentalRental').classList.toggle('selected', type === 'Rental Time');
+        document.getElementById('rentalOpen').classList.toggle('selected', type === 'Open Time');
+        // Recheck limit in case user switches rental type after picking a slot
+        if (selectedSlot) checkTimeLimit(selectedSlot);
+        else clearTimeNotice();
     }
 
     function loadReservedSlots(slots) {
@@ -1354,8 +1414,10 @@
             selectedSlot = '';
             document.getElementById('timeDisplay').textContent = '— pick a slot —';
             document.getElementById('hdnTime').value = '';
+            clearTimeNotice(); // ✅ clear notice if selected slot became taken
         }
         renderSlots();
+        if (selectedSlot) checkTimeLimit(selectedSlot); // ✅ recheck on date/table change
     }
 
     function fetchSlots(tableID, date) {

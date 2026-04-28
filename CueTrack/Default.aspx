@@ -36,19 +36,35 @@
             </div>
 
             <!-- REGISTER FORM -->
-            <div id="registerForm" style="display:none;">
-                <h2>Register</h2>
-                <asp:TextBox ID="txtFirstname" runat="server" CssClass="input" Placeholder="First Name"></asp:TextBox>
-                <asp:TextBox ID="txtLastname" runat="server" CssClass="input" Placeholder="Last Name"></asp:TextBox>
-                <asp:TextBox ID="txtPhoneno" runat="server" CssClass="input" Placeholder="Phone number"></asp:TextBox>
-                <asp:TextBox ID="txtEmail" runat="server" CssClass="input" Placeholder="Email"></asp:TextBox>
-                <asp:TextBox ID="txtPassword" runat="server" CssClass="input" TextMode="Password" Placeholder="Password"></asp:TextBox>
-               <asp:Button ID="btnRegister" runat="server" Text="Register"
-    CssClass="btn" OnClick="BtnRegister_Click" />
-                <p>Already have an account?
-                    <a href="#" onclick="showLogin(); return false;">Login</a>
-                </p>
-            </div>
+<!-- REGISTER FORM -->
+<div id="registerForm" style="display:none;">
+    <h2>Register</h2>
+    <asp:TextBox ID="txtFirstname" runat="server" CssClass="input" Placeholder="First Name"></asp:TextBox>
+    <asp:TextBox ID="txtLastname" runat="server" CssClass="input" Placeholder="Last Name"></asp:TextBox>
+    <asp:TextBox ID="txtPhoneno" runat="server" CssClass="input" Placeholder="Phone number"></asp:TextBox>
+    <asp:TextBox ID="txtEmail" runat="server" CssClass="input" Placeholder="Email"></asp:TextBox>
+    <asp:TextBox ID="txtPassword" runat="server" CssClass="input" TextMode="Password" Placeholder="Password"></asp:TextBox>
+
+    <!-- ✅ ADD THIS CHECKBOX ROW -->
+    <div style="display:flex;align-items:flex-start;gap:8px;margin:10px 0;text-align:left;">
+        <input type="checkbox" id="chkTerms" style="margin-top:3px;accent-color:orange;width:15px;height:15px;flex-shrink:0;cursor:pointer;" />
+        <label for="chkTerms" style="font-size:12px;color:#ccc;line-height:1.5;cursor:pointer;">
+            I have read and agree to the
+            <a href="#" onclick="openTermsPopup();return false;" 
+               style="color:orange;font-weight:700;text-decoration:underline;">
+                Terms &amp; Conditions
+            </a>
+        </label>
+    </div>
+    <!-- ✅ END CHECKBOX ROW -->
+
+<asp:Button ID="btnRegister" runat="server" Text="Register"
+    CssClass="btn" OnClick="BtnRegister_Click"
+    OnClientClick="return validateRegister();" />
+    <p>Already have an account?
+        <a href="#" onclick="showLogin(); return false;">Login</a>
+    </p>
+</div>
         </div>
     </div>
 
@@ -217,6 +233,118 @@
     </footer>
 
 </form>
+    <!-- TERMS POPUP -->
+<div id="termsPopup" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.88);
+    z-index:1100;
+    align-items:center;
+    justify-content:center;
+    padding:20px;">
+
+    <div style="
+        background:#111;
+        border:1px solid #333;
+        border-radius:14px;
+        width:100%;
+        max-width:420px;
+        max-height:85vh;
+        display:flex;
+        flex-direction:column;
+        overflow:hidden;">
+
+        <!-- Header -->
+        <div style="
+            background:linear-gradient(135deg,orange,#ff7b00);
+            padding:16px 20px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            flex-shrink:0;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="font-size:22px;">📋</span>
+                <div>
+                    <div style="font-weight:900;font-size:16px;color:black;text-transform:uppercase;letter-spacing:1px;">Terms &amp; Conditions</div>
+                    <div style="font-size:11px;color:rgba(0,0,0,0.6);font-weight:600;margin-top:2px;">Scroll down to accept</div>
+                </div>
+            </div>
+            <div onclick="closeTermsPopup()" style="
+                width:28px;height:28px;
+                background:rgba(0,0,0,0.2);
+                border-radius:50%;
+                display:flex;align-items:center;justify-content:center;
+                cursor:pointer;font-size:15px;font-weight:900;color:black;">✕</div>
+        </div>
+
+        <!-- Scrollable content -->
+        <div id="termsScrollBody" onscroll="onTermsScroll()" style="
+            padding:18px 20px;
+            overflow-y:auto;
+            flex:1;
+            font-size:12px;
+            color:#bbb;
+            line-height:1.7;">
+
+            <div style="color:orange;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">1. Account Registration</div>
+            <p style="margin-bottom:14px;">By creating an account with CueTrack, you agree to provide accurate, complete, and current information. You are responsible for maintaining the confidentiality of your account credentials and all activities that occur under your account.</p>
+
+            <div style="color:orange;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">2. Reservation Policy</div>
+            <ul style="padding-left:16px;margin-bottom:14px;">
+                <li>Reservations are on a first-come, first-served basis.</li>
+                <li>You may only reserve one table per time slot.</li>
+                <li>Please arrive on time — late arrivals may forfeit their slot.</li>
+                <li>Reservations cannot be transferred to another person.</li>
+            </ul>
+
+            <div style="color:orange;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">3. Cancellation Policy</div>
+            <p style="margin-bottom:14px;">Cancellations must be made at least 1 hour before your reserved time. Repeated no-shows may result in suspension of your account.</p>
+
+            <div style="color:orange;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">4. Discount Eligibility</div>
+            <p style="margin-bottom:14px;">Student, PWD, and Senior discounts require a valid ID upon arrival. Failure to present a valid ID will result in the full standard rate being charged.</p>
+
+            <div style="color:orange;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">5. Conduct</div>
+            <ul style="padding-left:16px;margin-bottom:14px;">
+                <li>All players must follow Sharks Arena house rules at all times.</li>
+                <li>Disruptive behavior may result in removal without refund.</li>
+                <li>Management reserves the right to refuse service to anyone.</li>
+            </ul>
+
+            <div style="color:orange;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">6. Privacy</div>
+            <p style="margin-bottom:14px;">Your personal information (name, email, phone number) is collected solely for reservation and account management purposes and will not be shared with third parties without your consent.</p>
+
+            <div style="color:orange;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">7. Liability</div>
+            <p style="margin-bottom:6px;">Sharks Arena and CueTrack are not liable for lost or stolen personal belongings. All players use equipment at their own risk.</p>
+
+        </div>
+
+        <!-- Hint -->
+        <div id="termsScrollHint" style="
+            text-align:center;font-size:10px;
+            color:#555;padding:6px 0;
+            flex-shrink:0;
+            border-top:1px solid #222;">
+            ↓ Keep scrolling to enable Accept
+        </div>
+
+        <!-- Footer -->
+        <div style="padding:14px 20px 18px;border-top:1px solid #222;flex-shrink:0;">
+            <button id="termsAcceptBtn" onclick="acceptTerms()" disabled style="
+                width:100%;padding:12px;
+                background:orange;border:none;
+                border-radius:10px;
+                font-size:15px;font-weight:900;
+                color:black;cursor:pointer;
+                text-transform:uppercase;
+                letter-spacing:1px;
+                opacity:0.35;
+                transition:opacity 0.3s;">
+                ✓ I Accept the Terms
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- JS -->
 <script src="Scripts/JavaScript.js"></script>
