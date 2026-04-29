@@ -697,6 +697,21 @@
     transition: all 0.2s; box-shadow: 0 4px 20px rgba(192,57,43,0.35);
 }
 .btn-danger:hover { transform: translateY(-2px); }
+.hour-btn {
+    padding: 10px 18px;
+    background: rgba(26,26,26,0.9);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; font-weight: 800;
+    color: var(--orange); text-transform: uppercase;
+    cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.hour-btn:hover, .hour-btn.selected {
+    border-color: var(--orange);
+    background: rgba(255,140,0,0.1);
+    box-shadow: 0 0 0 2px rgba(255,140,0,0.2);
+}
     </style>
 </head>
 <body>
@@ -941,6 +956,20 @@
                     <div class="rental-btn selected" id="rentalRental" onclick="selectRental('Rental Time')">Rental<br/>Time</div>
                     <div class="rental-btn"           id="rentalOpen"   onclick="selectRental('Open Time')">Open<br/>Time</div>
                 </div>
+                <!-- HOURS SELECTOR — only shows for Rental Time -->
+<div id="hoursSelector" style="margin-bottom:28px;">
+    <div class="sub-label">How Many Hours?</div>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+        <div class="hour-btn selected" onclick="selectHours(1)">1 hr</div>
+        <div class="hour-btn" onclick="selectHours(2)">2 hrs</div>
+        <div class="hour-btn" onclick="selectHours(3)">3 hrs</div>
+        <div class="hour-btn" onclick="selectHours(4)">4 hrs</div>
+        <div class="hour-btn" onclick="selectHours(5)">5 hrs</div>
+        <div class="hour-btn" onclick="selectHours(6)">6 hrs</div>
+        <div class="hour-btn" onclick="selectHours(7)">7 hrs</div>
+        <div class="hour-btn" onclick="selectHours(8)">8 hrs</div>
+    </div>
+</div>
                 <div class="sub-label">Discount</div>
                 <div class="discount-card">
                     <div class="discount-text">
@@ -1086,7 +1115,7 @@
     <asp:HiddenField ID="hdnContact"   runat="server" />
     <asp:HiddenField ID="hdnDiscount"  runat="server" />
     <asp:HiddenField ID="hdnStep"      runat="server" Value="1" />
-
+    <asp:HiddenField ID="hdnHours" runat="server" Value="1" />
     <asp:Button ID="btnLoadSlots" runat="server" style="display:none" OnClick="BtnLoadSlots_Click" />
 
 </form>
@@ -1124,6 +1153,26 @@
     var modalTableID = null;
     var PROGRESS = { 1: '25%', 2: '50%', 3: '75%', 4: '100%' };
 
+    var selectedHours = 1; // default
+
+    function selectHours(h) {
+        selectedHours = h;
+        document.querySelectorAll('.hour-btn').forEach(function (btn) {
+            btn.classList.remove('selected');
+        });
+        event.target.classList.add('selected');
+        if (selectedSlot) checkTimeLimit(selectedSlot);
+    }
+
+    function selectRental(type) {
+        selectedRental = type;
+        document.getElementById('rentalRental').classList.toggle('selected', type === 'Rental Time');
+        document.getElementById('rentalOpen').classList.toggle('selected', type === 'Open Time');
+        // Show hours selector only for Rental Time
+        document.getElementById('hoursSelector').style.display = type === 'Rental Time' ? 'block' : 'none';
+        if (selectedSlot) checkTimeLimit(selectedSlot);
+        else clearTimeNotice();
+    }
     // ── DROPDOWN ───────────────────────────────────────────────
     function toggleDropdown() {
         var wrap = document.getElementById('userChipWrap');
@@ -1370,30 +1419,51 @@
 
     // ── TIME LIMIT CHECK ───────────────────────────────────────
     function checkTimeLimit(slot) {
-        if (selectedRental !== 'Open Time') return; // only matters for Open Time
-
+        clearTimeNotice();
+        var btn = document.querySelector('.btn-orange[onclick="goStep(2)"]');
         var idx = ALL_SLOTS.indexOf(slot);
         if (idx === -1) return;
 
-        // Find the next taken slot after the selected one
-        for (var i = idx + 1; i < ALL_SLOTS.length; i++) {
-            if (takenSlots.indexOf(ALL_SLOTS[i]) !== -1) {
-                var hoursLimit = i - idx;
-                var nextSlot = ALL_SLOTS[i];
-                showTimeNotice(
-                    'Time Limit Notice',
-                    'Another reservation exists at <strong>' + nextSlot + '</strong>. ' +
-                    'Your Open Time session will be limited to <strong>' + hoursLimit +
-                    ' hour' + (hoursLimit > 1 ? 's' : '') + '</strong>.',
-                    'warning'
-                );
+        if (selectedRental === 'Open Time') {
+            for (var i = idx + 1; i < ALL_SLOTS.length; i++) {
+                if (takenSlots.indexOf(ALL_SLOTS[i]) !== -1) {
+                    showTimeNotice('⛔ Open Time Not Available',
+                        'A reservation exists at <strong>' + ALL_SLOTS[i] + '</strong>. ' +
+                        'Please use <strong>Rental Time</strong> or choose a later slot.',
+                        'error');
+                    if (btn) btn.disabled = true;
+                    return;
+                }
+            }
+        } else if (selectedRental === 'Rental Time' && selectedHours > 1) {
+            var endIdx = idx + selectedHours;
+
+            if (endIdx > ALL_SLOTS.length) {
+                showTimeNotice('⛔ Not Enough Slots',
+                    'Not enough time slots remaining for <strong>' + selectedHours + ' hours</strong> starting at <strong>' + slot + '</strong>.',
+                    'error');
+                if (btn) btn.disabled = true;
                 return;
             }
-        }
-        // No conflict — clear any existing notice
-        clearTimeNotice();
-    }
 
+            for (var i = idx + 1; i < endIdx; i++) {
+                if (takenSlots.indexOf(ALL_SLOTS[i]) !== -1) {
+                    showTimeNotice('⛔ Slot Conflict',
+                        '<strong>' + ALL_SLOTS[i] + '</strong> is already taken. ' +
+                        'Cannot reserve <strong>' + selectedHours + ' hours</strong> from <strong>' + slot + '</strong>.',
+                        'error');
+                    if (btn) btn.disabled = true;
+                    return;
+                }
+            }
+
+            showTimeNotice('✅ ' + selectedHours + '-Hour Block',
+                'Table reserved from <strong>' + slot + '</strong> to <strong>' + ALL_SLOTS[endIdx] + '</strong>.',
+                'warning');
+        }
+
+        if (btn) btn.disabled = false;
+    }
     function showTimeNotice(title, message, type) {
         var box = document.getElementById('timeNoticeBox');
         if (!box) return;
@@ -1415,16 +1485,6 @@
         document.getElementById('hdnTime').value = slot;
         renderSlots();
         checkTimeLimit(slot); // ✅ check after selecting
-    }
-
-    // ── RENTAL SELECTION (updated to recheck on type change) ───
-    function selectRental(type) {
-        selectedRental = type;
-        document.getElementById('rentalRental').classList.toggle('selected', type === 'Rental Time');
-        document.getElementById('rentalOpen').classList.toggle('selected', type === 'Open Time');
-        // Recheck limit in case user switches rental type after picking a slot
-        if (selectedSlot) checkTimeLimit(selectedSlot);
-        else clearTimeNotice();
     }
 
     function loadReservedSlots(slots) {
@@ -1495,6 +1555,7 @@
         setText('summaryGuests', guests);
         setText('summaryRates', rateLabel);
 
+        setHdn('hdnHours', selectedHours.toString());
         setHdn('hdnTime', selectedSlot);
         setHdn('hdnDate', date);
         setHdn('hdnRental', selectedRental);
@@ -1502,6 +1563,17 @@
         setHdn('hdnGuestName', name);
         setHdn('hdnContact', contact);
         setHdn('hdnDiscount', discount ? '1' : '0');
+
+        if (selectedRental === 'Rental Time') {
+            var rate = discount ? 300 : 350;
+            var total = rate * selectedHours;
+            rateLabel = selectedHours > 1
+                ? '₱ ' + total + ' total (' + selectedHours + 'hrs × ₱' + rate + (discount ? ' discounted)' : ')')
+                : '₱ ' + rate + '/hr' + (discount ? ' (discounted)' : '');
+        } else {
+            rateLabel = 'To be billed upon session end ('
+                + (discount ? '₱300/hr discounted' : '₱350/hr') + ')';
+        }
     }
 
     function prepareConfirm() { populateSummary(); return true; }

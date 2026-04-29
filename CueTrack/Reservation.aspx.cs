@@ -5,6 +5,8 @@ using System.Configuration;
 using System.Security.Cryptography;
 using System.Text;
 using System.Web.UI;
+using System.Net;
+using System.Net.Mail;
 
 namespace CueTrack
 {
@@ -82,7 +84,145 @@ namespace CueTrack
             ScriptManager.RegisterStartupScript(this, GetType(), "initSlots",
                 $"var serverInitSlots = {slotsJson}; loadReservedSlots({slotsJson});", true);
         }
+        // ── SEND EMAIL ─────────────────────────────────────────
+        private void SendEmail(string toAddress, string subject, string htmlBody)
+        {
+            string smtpHost = ConfigurationManager.AppSettings["SmtpHost"] ?? "smtp.gmail.com";
+            int smtpPort = int.Parse(ConfigurationManager.AppSettings["SmtpPort"] ?? "587");
+            bool enableSsl = bool.Parse(ConfigurationManager.AppSettings["SmtpEnableSsl"] ?? "true");
+            string smtpUser = ConfigurationManager.AppSettings["SmtpUser"] ?? "";
+            string smtpPass = ConfigurationManager.AppSettings["SmtpPass"] ?? "";
+            string fromAddress = ConfigurationManager.AppSettings["SmtpFromEmail"] ?? smtpUser;
+            string fromName = ConfigurationManager.AppSettings["SmtpFromName"] ?? "CueTrack";
 
+            using (var mail = new MailMessage())
+            {
+                mail.From = new MailAddress(fromAddress, fromName);
+                mail.Subject = subject;
+                mail.Body = htmlBody;
+                mail.IsBodyHtml = true;
+                mail.To.Add(toAddress);
+
+                using (var smtp = new SmtpClient(smtpHost, smtpPort))
+                {
+                    smtp.EnableSsl = enableSsl;
+                    smtp.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    smtp.UseDefaultCredentials = false;
+                    smtp.Credentials = new NetworkCredential(smtpUser, smtpPass);
+                    smtp.Send(mail);
+                }
+            }
+        }
+
+        // ── BUILD EMAIL HTML ───────────────────────────────────
+        private string BuildConfirmationEmail(
+            string firstName, string guestName, string tableID,
+            string date, string time, string rentalType,
+            string contact, string guests, bool discount, int hours)
+        {
+            string rateDisplay;
+            if (rentalType == "Rental Time")
+            {
+                int rate = discount ? 300 : 350;
+                int total = rate * hours;
+                rateDisplay = hours > 1
+                    ? $"₱{total} total ({hours} hrs × ₱{rate}{(discount ? ", discounted" : "")})"
+                    : $"₱{rate}/hr{(discount ? " (discounted)" : "")}";
+            }
+            else
+            {
+                rateDisplay = discount ? "₱300/hr (discounted) – billed at end" : "₱350/hr – billed at end";
+            }
+
+            string guestCountLabel = string.IsNullOrEmpty(guests) ? "1" : guests;
+            string discountLabel = discount ? "Yes (Student / PWD / Senior)" : "None";
+            string formattedDate = date;
+            if (DateTime.TryParse(date, out DateTime parsedDate))
+                formattedDate = parsedDate.ToString("MMMM dd, yyyy");
+
+            return $@"<!DOCTYPE html>
+<html>
+<body style='margin:0;padding:0;background:#0f0f0f;font-family:Arial,sans-serif;'>
+<table width='100%' cellpadding='0' cellspacing='0' style='background:#0f0f0f;padding:30px 0;'>
+  <tr><td align='center'>
+    <table width='560' cellpadding='0' cellspacing='0'
+           style='background:#1a1a1a;border-radius:16px;overflow:hidden;border:1px solid #2a2a2a;max-width:560px;width:100%;'>
+      <tr>
+        <td style='background:linear-gradient(135deg,#FF8C00,#FF6A00);padding:28px 32px;text-align:center;'>
+          <p style='margin:0;font-size:28px;'>🎱</p>
+          <h1 style='margin:8px 0 4px;font-size:26px;font-weight:900;color:#000;text-transform:uppercase;letter-spacing:2px;'>Reservation Confirmed</h1>
+          <p style='margin:0;font-size:13px;color:rgba(0,0,0,0.65);font-weight:600;'>CueTrack Billiards Hall</p>
+        </td>
+      </tr>
+      <tr>
+        <td style='padding:28px 32px 0;'>
+          <p style='margin:0;font-size:15px;color:#f0f0f0;'>Hi <strong style='color:#FF8C00;'>{firstName}</strong>,</p>
+          <p style='margin:8px 0 0;font-size:14px;color:#888;line-height:1.6;'>Your reservation is confirmed and pending approval. Here's your booking summary:</p>
+        </td>
+      </tr>
+      <tr>
+        <td style='padding:20px 32px;'>
+          <table width='100%' cellpadding='0' cellspacing='0' style='background:#111;border-radius:12px;border:1px solid #2a2a2a;'>
+            {EmailRow("📅 Date", formattedDate, true)}
+            {EmailRow("🕐 Time", time, false)}
+            {EmailRow("🎱 Table", "Table " + tableID, true)}
+            {EmailRow("📋 Rental Type", rentalType, false)}
+            {EmailRow("⏱ Duration", hours == 1 ? "1 hour" : hours + " hours", true)}
+            {EmailRow("👤 Guest Name", guestName, false)}
+            {EmailRow("📞 Contact", contact, true)}
+            {EmailRow("👥 No. of Guests", guestCountLabel, false)}
+            {EmailRow("🏷 Discount", discountLabel, true)}
+            {EmailRow("💰 Rate", rateDisplay, false)}
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style='padding:0 32px 24px;'>
+          <table width='100%' cellpadding='0' cellspacing='0'
+                 style='background:rgba(255,140,0,0.08);border:1px solid #FF8C00;border-radius:10px;padding:14px 18px;'>
+            <tr><td>
+              <p style='margin:0;font-size:13px;color:#FF8C00;font-weight:700;text-transform:uppercase;letter-spacing:1px;'>⏳ Status: Pending Approval</p>
+              <p style='margin:6px 0 0;font-size:12px;color:#888;line-height:1.5;'>Our staff will review your booking shortly. Please bring a valid ID if a discount was applied.</p>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style='padding:0 32px 28px;'>
+          <table width='100%' cellpadding='0' cellspacing='0'
+                 style='background:#161616;border:1px solid #2a2a2a;border-radius:10px;padding:14px 18px;'>
+            <tr><td>
+              <p style='margin:0;font-size:12px;color:#888;line-height:1.7;'>
+                📌 <strong style='color:#f0f0f0;'>Reminders:</strong><br/>
+                • Arrive at least 5 minutes before your scheduled time.<br/>
+                • Bring a valid ID if you applied for a Student / PWD / Senior discount.<br/>
+                • Contact us if you need to cancel or reschedule.
+              </p>
+            </td></tr>
+          </table>
+        </td>
+      </tr>
+      <tr>
+        <td style='background:#111;padding:18px 32px;text-align:center;border-top:1px solid #2a2a2a;'>
+          <p style='margin:0;font-size:12px;color:#555;'>This is an automated confirmation from <strong style='color:#FF8C00;'>CueTrack</strong>. Please do not reply.</p>
+        </td>
+      </tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>";
+        }
+
+        // ── EMAIL ROW HELPER ───────────────────────────────────
+        private string EmailRow(string label, string value, bool shaded)
+        {
+            string bg = shaded ? "background:#161616;" : "";
+            return $@"<tr>
+              <td style='{bg}padding:12px 18px;border-bottom:1px solid #2a2a2a;font-size:12px;color:#888;font-weight:700;text-transform:uppercase;width:38%;vertical-align:top;'>{label}</td>
+              <td style='{bg}padding:12px 18px;border-bottom:1px solid #2a2a2a;font-size:13px;color:#f0f0f0;font-weight:600;vertical-align:top;'>{value}</td>
+            </tr>";
+        }
         // ── CONFIRM BOOKING ────────────────────────────────────
         protected void BtnConfirm_Click(object sender, EventArgs e)
         {
@@ -95,6 +235,8 @@ namespace CueTrack
             string guests = hdnGuests.Value;
             bool discount = hdnDiscount.Value == "1";
             string userID = Session["UserID"].ToString();
+            string userEmail = Session["Email"]?.ToString() ?? "";
+            string firstName = Session["FirstName"]?.ToString() ?? "Guest";
 
             if (string.IsNullOrEmpty(tableID) || string.IsNullOrEmpty(time) ||
                 string.IsNullOrEmpty(date) || string.IsNullOrEmpty(guestName) ||
@@ -152,11 +294,65 @@ namespace CueTrack
                         ins.Parameters.AddWithValue("@Discount", discount);
                         ins.ExecuteNonQuery();
                     }
+                    int hours = int.Parse(string.IsNullOrEmpty(hdnHours.Value) ? "1" : hdnHours.Value);
+                    if (hours > 1)
+                    {
+                        var ALL_SLOTS_CS = new List<string> {
+        "3:00 PM","4:00 PM","5:00 PM","6:00 PM",
+        "7:00 PM","8:00 PM","9:00 PM","10:00 PM",
+        "11:00 PM","12:00 AM","1:00 AM","2:00 AM",
+        "3:00 AM","4:00 AM","5:00 AM"
+    };
+
+                        int startIdx = ALL_SLOTS_CS.IndexOf(time);
+                        for (int i = startIdx + 1; i < startIdx + hours && i < ALL_SLOTS_CS.Count; i++)
+                        {
+                            string blockQ = @"
+            INSERT INTO Reservations
+                (UserID, TableID, ReservationDate, Schedule,
+                 RentalType, GuestName, ContactNo,
+                 GuestCount, HasDiscount, Status, CreatedAt)
+            VALUES
+                (@UserID, @TableID, @Date, @Time,
+                 @RentalType, @GuestName, @ContactNo,
+                 @GuestCount, @Discount, 'Pending', GETDATE())";
+
+                            using (SqlCommand blk = new SqlCommand(blockQ, conn))
+                            {
+                                blk.Parameters.AddWithValue("@UserID", int.Parse(userID));
+                                blk.Parameters.AddWithValue("@TableID", int.Parse(tableID));
+                                blk.Parameters.AddWithValue("@Date", date);
+                                blk.Parameters.AddWithValue("@Time", ALL_SLOTS_CS[i]);
+                                blk.Parameters.AddWithValue("@RentalType", rentalType);
+                                blk.Parameters.AddWithValue("@GuestName", guestName);
+                                blk.Parameters.AddWithValue("@ContactNo", contact);
+                                blk.Parameters.AddWithValue("@GuestCount", string.IsNullOrEmpty(guests) ? 1 : int.Parse(guests));
+                                blk.Parameters.AddWithValue("@Discount", discount);
+                                blk.ExecuteNonQuery();
+                            }
+                        }
+                    }
                 }
 
                 hdnStep.Value = "4";
                 ScriptManager.RegisterStartupScript(this, GetType(), "showOK",
                     "showSuccess();", true);
+
+                // ── Send confirmation email ──────────────────────
+                if (!string.IsNullOrEmpty(userEmail))
+                {
+                    try
+                    {
+                        int hours = int.Parse(string.IsNullOrEmpty(hdnHours.Value) ? "1" : hdnHours.Value);
+                        SendEmail(userEmail, "CueTrack – Reservation Confirmed 🎱",
+                            BuildConfirmationEmail(firstName, guestName, tableID, date,
+                                time, rentalType, contact, guests, discount, hours));
+                    }
+                    catch (Exception emailEx)
+                    {
+                        System.Diagnostics.Debug.WriteLine("Email error: " + emailEx.Message);
+                    }
+                }
             }
             catch (Exception ex)
             {

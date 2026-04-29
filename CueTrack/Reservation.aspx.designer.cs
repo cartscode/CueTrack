@@ -285,6 +285,15 @@ namespace CueTrack
         protected global::System.Web.UI.WebControls.HiddenField hdnStep;
 
         /// <summary>
+        /// hdnHours control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hdnHours;
+
+        /// <summary>
         /// btnLoadSlots control.
         /// </summary>
         /// <remarks>
