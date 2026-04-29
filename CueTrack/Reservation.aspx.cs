@@ -275,17 +275,51 @@ namespace CueTrack
                 using (SqlConnection conn = new SqlConnection(connStr))
                 {
                     conn.Open();
+
+                    // Get all reservations for this table/date
                     string q = @"
-                        SELECT Schedule FROM Reservations
-                        WHERE  TableID = @TableID
-                          AND  CONVERT(DATE, ReservationDate) = CONVERT(DATE, @Date)
-                          AND  Status <> 'Cancelled'";
+                SELECT Schedule, RentalType FROM Reservations
+                WHERE  TableID = @TableID
+                  AND  CONVERT(DATE, ReservationDate) = CONVERT(DATE, @Date)
+                  AND  Status <> 'Cancelled'
+                ORDER BY Schedule";
+
+                    var ALL_SLOTS_CS = new List<string> {
+                "3:00 PM","4:00 PM","5:00 PM","6:00 PM",
+                "7:00 PM","8:00 PM","9:00 PM","10:00 PM",
+                "11:00 PM","12:00 AM","1:00 AM","2:00 AM",
+                "3:00 AM","4:00 AM","5:00 AM"
+            };
+
                     using (SqlCommand cmd = new SqlCommand(q, conn))
                     {
                         cmd.Parameters.AddWithValue("@TableID", tableID);
                         cmd.Parameters.AddWithValue("@Date", date);
+
                         using (var r = cmd.ExecuteReader())
-                            while (r.Read()) list.Add(r.GetString(0).Trim());
+                        {
+                            while (r.Read())
+                            {
+                                string schedule = r.GetString(0).Trim();
+                                string rentalType = r.GetString(1).Trim();
+
+                                list.Add(schedule);
+
+                                // If Open Time, block all slots after this one
+                                if (rentalType == "Open Time")
+                                {
+                                    int idx = ALL_SLOTS_CS.IndexOf(schedule);
+                                    if (idx >= 0)
+                                    {
+                                        for (int i = idx + 1; i < ALL_SLOTS_CS.Count; i++)
+                                        {
+                                            if (!list.Contains(ALL_SLOTS_CS[i]))
+                                                list.Add(ALL_SLOTS_CS[i]);
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -295,7 +329,6 @@ namespace CueTrack
             }
             return list;
         }
-
         private List<int> GetReservedTablesForDate(string date)
         {
             var list = new List<int>();
@@ -347,5 +380,7 @@ namespace CueTrack
             ScriptManager.RegisterStartupScript(this, GetType(), "alert",
                 $"alert('{msg}');", true);
         }
+
     }
+
 }
