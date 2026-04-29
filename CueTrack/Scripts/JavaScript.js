@@ -116,20 +116,38 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Scroll → sync active with visible section
+// Scroll → sync active navbar with visible section
 window.addEventListener('scroll', function () {
-    var sections = document.querySelectorAll('section[id], div[id]');
+
+    // ONLY detect actual page sections
+    var sections = document.querySelectorAll('#home, #services, #contact, #about');
+
+    // Navbar links except login button
     var navLinks = document.querySelectorAll('.nav-links a:not(.login-btn)');
+
     var current = '';
 
     sections.forEach(function (section) {
-        if (window.scrollY >= section.offsetTop - 100) {
+        // Adjust because navbar is fixed (offset for visibility)
+        var sectionTop = section.offsetTop - 120;
+
+        // Total section height
+        var sectionHeight = section.offsetHeight;
+
+        // Detect current visible section based on scroll boundaries
+        if (
+            window.scrollY >= sectionTop &&
+            window.scrollY < sectionTop + sectionHeight
+        ) {
             current = section.getAttribute('id');
         }
     });
 
+    // Sync classes
     navLinks.forEach(function (link) {
         link.classList.remove('active');
+
+        // Add active class to the link matching the current section ID
         if (link.getAttribute('href') === '#' + current) {
             link.classList.add('active');
         }

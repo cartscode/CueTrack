@@ -8,6 +8,25 @@
     <title>CueTrack - Reservation</title>
     <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
     <style>
+        /* ── TIME LIMIT NOTICE ── */
+.time-notice {
+    display: flex; align-items: flex-start; gap: 12px;
+    border-radius: 10px; padding: 12px 16px;
+    margin-top: 16px;
+}
+.time-notice-warning {
+    background: rgba(255, 140, 0, 0.1);
+    border: 1px solid var(--orange);
+}
+.time-notice-icon { font-size: 20px; flex-shrink: 0; }
+.time-notice-title {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 14px; font-weight: 800;
+    color: var(--orange); text-transform: uppercase;
+    letter-spacing: 0.5px; margin-bottom: 4px;
+}
+.time-notice-msg { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.time-notice-msg strong { color: white; }
         :root {
             --orange: #FF8C00;
             --orange-hot: #FF6A00;
@@ -926,7 +945,7 @@
                 <div class="discount-card">
                     <div class="discount-text">
                         <h4>Student / PWD / Senior</h4>
-                        <p>₱ 50 off per hour – valid ID at arrival</p>
+                        <p>₱ 50 off per hour · ₱350 → ₱300/hr – valid ID at arrival</p>
                     </div>
                     <label class="toggle">
                         <input type="checkbox" id="discountToggle" />
@@ -1426,12 +1445,6 @@
         document.getElementById('btnLoadSlots').click();
     }
 
-    // ── RENTAL ─────────────────────────────────────────────────
-    function selectRental(type) {
-        selectedRental = type;
-        document.getElementById('rentalRental').classList.toggle('selected', type === 'Rental Time');
-        document.getElementById('rentalOpen').classList.toggle('selected', type === 'Open Time');
-    }
 
     // ── STEP NAV ───────────────────────────────────────────────
     function goStep(n) {

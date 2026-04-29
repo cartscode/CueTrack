@@ -84,7 +84,7 @@
         <span></span>
     </div>
     <div class="nav-links" id="navLinks">
-        <a href="#home" onclick="toggleMenu()">Home</a>
+        <a href="#home" class="active" onclick="toggleMenu()">Home</a>
         <a href="#services" onclick="toggleMenu()">Services</a>
         <a href="#contact" onclick="toggleMenu()">Contact Us</a>
         <a href="#about" onclick="toggleMenu()">About Us</a>
