@@ -102,3 +102,34 @@ CREATE TABLE [dbo].[Cashiers] (
     UNIQUE NONCLUSTERED ([Email] ASC)
 );
 GO
+
+-- ── CueTrack: Order Tables ──────────────────────────────────
+
+CREATE TABLE Orders (
+    OrderID     INT           IDENTITY(1,1) PRIMARY KEY,
+    UserID      INT           NOT NULL,
+    TableID     INT           NOT NULL,
+    Notes       NVARCHAR(500) NULL,
+    TotalAmount DECIMAL(10,2) NOT NULL DEFAULT 0,
+    Status      NVARCHAR(50)  NOT NULL DEFAULT 'Pending',  -- Pending / Preparing / Served / Cancelled
+    CreatedAt   DATETIME      NOT NULL DEFAULT GETDATE(),
+
+    CONSTRAINT FK_Orders_Users  FOREIGN KEY (UserID)  REFERENCES Users(UserID),
+);
+
+CREATE TABLE OrderItems (
+    OrderItemID INT           IDENTITY(1,1) PRIMARY KEY,
+    OrderID     INT           NOT NULL,
+    ItemID      NVARCHAR(20)  NOT NULL,  -- matches JS item id (e.g. 'c1', 'b3')
+    ItemName    NVARCHAR(200) NOT NULL,
+    UnitPrice   DECIMAL(10,2) NOT NULL,
+    Quantity    INT           NOT NULL,
+    LineTotal   DECIMAL(10,2) NOT NULL,
+
+    CONSTRAINT FK_OrderItems_Orders FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
+);
+
+-- Optional: index for quick lookup by table / date
+CREATE INDEX IX_Orders_TableDate ON Orders (TableID, CreatedAt);
+CREATE INDEX IX_Orders_User      ON Orders (UserID);
+CREATE INDEX IX_OrderItems_Order ON OrderItems (OrderID);   

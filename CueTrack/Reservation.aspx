@@ -877,9 +877,9 @@
     <div class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-close" onclick="closeMobileMenu()">✕</div>
         <a href="Reservation.aspx">Reservation</a>
-        <a href="#">Menu</a>
+        <a href="Menu.aspx">Menu</a>
         <a href="#">Events</a>
-        <a href="#">Account</a>
+        <a href="#" onclick="openSettings()">Account</a>
     </div>
 
     <!-- NAVBAR -->
@@ -891,8 +891,8 @@
             <span class="logo-text">CueTrack</span>
         </div>
         <div class="navbar-nav">
-            <a href="#" class="nav-item active">Reservation</a>
-            <a href="#" class="nav-item">Menu</a>
+            <a href="Reservation.aspx" class="nav-item active">Reservation</a>
+            <a href="Menu.aspx" class="nav-item">Menu</a>
             <a href="#" class="nav-item">Events</a>
         </div>
       <div class="user-chip-wrap" id="userChipWrap">
