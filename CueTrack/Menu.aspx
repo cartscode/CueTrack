@@ -287,6 +287,30 @@
             .menu-grid { grid-template-columns: repeat(2, 1fr); }
             .left-panel { padding: 16px 14px; }
         }
+        /* ── DISCOUNT / PAYMENT SELECTION BUTTONS ── */
+.discount-btn {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: var(--text);
+}
+.discount-btn:hover {
+    border-color: var(--orange);
+    background: rgba(255,140,0,0.08);
+    transform: translateY(-2px);
+}
+.discount-btn.selected {
+    border-color: var(--orange);
+    background: rgba(255,140,0,0.12);
+}
     </style>
 </head>
 <body>
@@ -452,7 +476,165 @@
           
         </div>
     </div>
+    <!-- DISCOUNT MODAL -->
+<div class="modal-overlay" id="discountModal">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-hdr">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">🎟️</span>
+                <div>
+                    <div class="modal-hdr-title">Customer Type</div>
+                    <div class="modal-hdr-sub">Select your discount category</div>
+                </div>
+            </div>
+            <div class="modal-x" onclick="closeDiscountModal()">✕</div>
+        </div>
+        <div class="modal-bdy">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                <div class="discount-btn" onclick="selectDiscount('regular')">
+                    <div style="font-size:28px;">👤</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;">Regular</div>
+                    <div style="font-size:11px;color:var(--muted);">No discount</div>
+                </div>
+                <div class="discount-btn" onclick="selectDiscount('pwd')">
+                    <div style="font-size:28px;">♿</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;">PWD</div>
+                    <div style="font-size:11px;color:var(--muted);">20% off</div>
+                </div>
+                <div class="discount-btn" onclick="selectDiscount('senior')">
+                    <div style="font-size:28px;">👴</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;">Senior</div>
+                    <div style="font-size:11px;color:var(--muted);">20% off</div>
+                </div>
+                <div class="discount-btn" onclick="selectDiscount('student')">
+                    <div style="font-size:28px;">🎓</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;">Student</div>
+                    <div style="font-size:11px;color:var(--muted);">20% off</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
+<!-- PAYMENT METHOD MODAL -->
+<div class="modal-overlay" id="paymentModal">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-hdr">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">💳</span>
+                <div>
+                    <div class="modal-hdr-title">Payment Method</div>
+                    <div class="modal-hdr-sub" id="paymentSubtitle">Choose how to pay</div>
+                </div>
+            </div>
+            <div class="modal-x" onclick="closePaymentModal()">✕</div>
+        </div>
+        <div class="modal-bdy">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;">
+                <span style="color:var(--muted);font-size:13px;">Order Total</span>
+                <span id="paymentTotal" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--orange);">₱0</span>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="discount-btn" onclick="selectPayment('cash')">
+                    <div style="font-size:28px;">💵</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;">Cash</div>
+                    <div style="font-size:11px;color:var(--muted);">Pay at counter</div>
+                </div>
+                <div class="discount-btn" onclick="selectPayment('ewallet')">
+                    <div style="font-size:28px;">📱</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;">E-Wallet</div>
+                    <div style="font-size:11px;color:var(--muted);">GCash / PayMaya</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CASH REFERENCE MODAL -->
+<div class="modal-overlay" id="cashModal">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-hdr">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">🧾</span>
+                <div>
+                    <div class="modal-hdr-title">Order Placed!</div>
+                    <div class="modal-hdr-sub">Please pay at the counter</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-bdy" style="text-align:center;">
+            <p style="font-size:13px;color:var(--muted);margin-bottom:16px;">Show this reference number at the cashier.</p>
+            <div style="background:rgba(255,140,0,0.08);border:2px dashed var(--orange);border-radius:12px;padding:20px;margin-bottom:16px;">
+                <div style="font-size:12px;color:var(--muted);margin-bottom:6px;letter-spacing:1px;text-transform:uppercase;">Reference Number</div>
+                <div id="refNumber" style="font-family:'Barlow Condensed',sans-serif;font-size:42px;font-weight:800;color:var(--orange);letter-spacing:4px;"></div>
+            </div>
+            <div id="cashSummary" style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:left;margin-bottom:16px;font-size:13px;"></div>
+            <button type="button" class="btn-orange" onclick="closeCashModal()">DONE</button>
+        </div>
+    </div>
+</div>
+
+<!-- EWALLET CHOICE MODAL -->
+<div class="modal-overlay" id="ewalletModal">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-hdr">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;">📱</span>
+                <div>
+                    <div class="modal-hdr-title">Choose E-Wallet</div>
+                    <div class="modal-hdr-sub">Scan QR to complete payment</div>
+                </div>
+            </div>
+            <div class="modal-x" onclick="closeEwalletModal()">✕</div>
+        </div>
+        <div class="modal-bdy">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <div class="discount-btn" onclick="selectEwallet('gcash')">
+                    <div style="font-size:36px;">💙</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#007AFF;">GCash</div>
+                    <div style="font-size:11px;color:var(--muted);">Scan QR code</div>
+                </div>
+                <div class="discount-btn" onclick="selectEwallet('paymaya')">
+                    <div style="font-size:36px;">💚</div>
+                    <div style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:#00C170;">PayMaya</div>
+                    <div style="font-size:11px;color:var(--muted);">Scan QR code</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- QR CODE MODAL -->
+<div class="modal-overlay" id="qrModal">
+    <div class="modal-box" style="max-width:400px;">
+        <div class="modal-hdr" id="qrModalHdr">
+            <div style="display:flex;align-items:center;gap:12px;">
+                <span style="font-size:28px;" id="qrWalletIcon">💙</span>
+                <div>
+                    <div class="modal-hdr-title" id="qrWalletName">GCash</div>
+                    <div class="modal-hdr-sub">Scan the QR code below</div>
+                </div>
+            </div>
+            <div class="modal-x" onclick="closeQrModal()">✕</div>
+        </div>
+        <div class="modal-bdy" style="text-align:center;">
+            <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px;display:flex;justify-content:space-between;">
+                <span style="color:var(--muted);font-size:13px;">Amount to Pay</span>
+                <span id="qrAmount" style="font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800;color:var(--orange);">₱0</span>
+            </div>
+            <!-- QR Code placeholder — replace src with your actual QR images -->
+            <div style="background:white;border-radius:12px;padding:16px;display:inline-block;margin-bottom:16px;">
+                <img id="qrImage" src="#" alt="QR Code" style="width:200px;height:200px;display:block;" onerror="this.style.display='none';document.getElementById('qrFallback').style.display='flex'" />
+                <div id="qrFallback" style="display:none;width:200px;height:200px;background:#f5f5f5;border-radius:8px;align-items:center;justify-content:center;flex-direction:column;gap:8px;">
+                    <div style="font-size:48px;">📷</div>
+                    <div style="font-size:11px;color:#888;text-align:center;">Place your QR code<br/>image here</div>
+                </div>
+            </div>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:16px;">After payment, show your receipt to the staff.</p>
+            <button type="button" class="btn-orange" onclick="confirmQrPayment()">I HAVE PAID</button>
+        </div>
+    </div>
+</div>
 </form>
 
 <script>
@@ -569,6 +751,7 @@ var CAT_LABELS = {
 
 var cart = {};
 var activeFilter = 'all';
+
 
 /* ── RENDER MENU ── */
 function renderMenu() {
@@ -705,6 +888,12 @@ function clearCart() {
 }
 
 /* ── PLACE ORDER ── */
+    /* ── ORDER STATE ── */
+    var pendingOrderData = null;
+    var selectedDiscount = 'regular';
+    var finalTotal = 0;
+
+    /* ── PLACE ORDER — now opens discount modal first ── */
     function placeOrder() {
         var tableEl = document.getElementById('tableSelect');
         if (!tableEl.value) { alert('Please select your table number.'); return; }
@@ -714,9 +903,107 @@ function clearCart() {
             return { id: id, name: e.item.name, price: e.item.price, qty: e.qty };
         });
 
-        var total = orderLines.reduce(function (s, l) { return s + l.price * l.qty; }, 0);
+        var rawTotal = orderLines.reduce(function (s, l) { return s + l.price * l.qty; }, 0);
         var notes = document.getElementById('orderNotes').value.trim();
 
+        pendingOrderData = {
+            tableID: tableEl.value,
+            notes: notes,
+            items: orderLines,
+            rawTotal: rawTotal
+        };
+
+        // Open discount selection first
+        document.getElementById('discountModal').classList.add('open');
+    }
+
+    /* ── DISCOUNT SELECTION ── */
+    function selectDiscount(type) {
+        selectedDiscount = type;
+        var raw = pendingOrderData.rawTotal;
+        finalTotal = (type === 'regular') ? raw : raw * 0.80;
+        finalTotal = Math.round(finalTotal * 100) / 100;
+
+        document.getElementById('discountModal').classList.remove('open');
+
+        // Show payment total and open payment modal
+        var label = type === 'regular' ? 'No discount applied' :
+            '20% discount applied (' + type.charAt(0).toUpperCase() + type.slice(1) + ')';
+        document.getElementById('paymentSubtitle').textContent = label;
+        document.getElementById('paymentTotal').textContent = '₱' + finalTotal.toLocaleString();
+        document.getElementById('paymentModal').classList.add('open');
+    }
+
+    function closeDiscountModal() {
+        document.getElementById('discountModal').classList.remove('open');
+    }
+
+    /* ── PAYMENT SELECTION ── */
+    function selectPayment(method) {
+        document.getElementById('paymentModal').classList.remove('open');
+
+        if (method === 'cash') {
+            submitOrder('Cash', function (orderID, refNumber) {
+                document.getElementById('refNumber').textContent = refNumber;
+
+                // Build summary
+                var html = '';
+                pendingOrderData.items.slice(0, 4).forEach(function (l) {
+                    html += '<div style="display:flex;justify-content:space-between;color:var(--muted);margin-bottom:4px;"><span>' + l.name + ' ×' + l.qty + '</span><span>₱' + (l.price * l.qty).toLocaleString() + '</span></div>';
+                });
+                if (selectedDiscount !== 'regular') {
+                    html += '<div style="display:flex;justify-content:space-between;color:#27ae60;margin-bottom:4px;"><span>20% Discount</span><span>-₱' + (pendingOrderData.rawTotal - finalTotal).toLocaleString() + '</span></div>';
+                }
+                html += '<div style="display:flex;justify-content:space-between;border-top:1px dashed rgba(255,255,255,0.1);padding-top:8px;margin-top:4px;"><span style="color:var(--muted);">Table ' + pendingOrderData.tableID + ' · Total</span><span style="color:var(--orange);font-family:\'Barlow Condensed\',sans-serif;font-size:16px;font-weight:800;">₱' + finalTotal.toLocaleString() + '</span></div>';
+                document.getElementById('cashSummary').innerHTML = html;
+                document.getElementById('cashModal').classList.add('open');
+            });
+        } else {
+            document.getElementById('ewalletModal').classList.add('open');
+        }
+    }
+
+    function closePaymentModal() {
+        document.getElementById('paymentModal').classList.remove('open');
+    }
+
+    /* ── EWALLET SELECTION ── */
+    function selectEwallet(wallet) {
+        document.getElementById('ewalletModal').classList.remove('open');
+
+        var icon = wallet === 'gcash' ? '💙' : '💚';
+        var name = wallet === 'gcash' ? 'GCash' : 'PayMaya';
+        // Replace these src values with your actual QR code image paths
+        var qrSrc = wallet === 'gcash' ? 'Image/qr-gcash.png' : 'Image/qr-paymaya.png';
+
+        document.getElementById('qrWalletIcon').textContent = icon;
+        document.getElementById('qrWalletName').textContent = name;
+        document.getElementById('qrAmount').textContent = '₱' + finalTotal.toLocaleString();
+        document.getElementById('qrImage').src = qrSrc;
+        document.getElementById('qrFallback').style.display = 'none';
+        document.getElementById('qrImage').style.display = 'block';
+        document.getElementById('qrModal').classList.add('open');
+    }
+
+    function closeEwalletModal() {
+        document.getElementById('ewalletModal').classList.remove('open');
+    }
+
+    /* ── QR PAYMENT CONFIRMED ── */
+    function confirmQrPayment() {
+        document.getElementById('qrModal').classList.remove('open');
+        submitOrder('EWallet', function () {
+            showSuccess(pendingOrderData.tableID, pendingOrderData.items, finalTotal);
+        });
+    }
+
+    function closeQrModal() {
+        document.getElementById('qrModal').classList.remove('open');
+        document.getElementById('ewalletModal').classList.add('open');
+    }
+
+    /* ── SUBMIT ORDER TO SERVER ── */
+    function submitOrder(paymentMethod, onSuccess) {
         var btn = document.getElementById('placeOrderBtn');
         btn.disabled = true;
         btn.textContent = 'SENDING...';
@@ -725,27 +1012,39 @@ function clearCart() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                tableID: tableEl.value,
-                notes: notes,
-                total: total,
-                items: orderLines
+                tableID: pendingOrderData.tableID,
+                notes: pendingOrderData.notes,
+                total: finalTotal,
+                discountType: selectedDiscount,
+                paymentMethod: paymentMethod,
+                items: pendingOrderData.items
             })
         })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (!r.ok) return r.text().then(function (t) { throw new Error('HTTP ' + r.status + ': ' + t); });
+                return r.json();
+            })
             .then(function (data) {
                 btn.textContent = 'PLACE ORDER';
                 if (data.success) {
-                    showSuccess(tableEl.value, orderLines, total);
+                    onSuccess(data.orderID || 1000, data.refNumber || 'T0-001');
+                
                 } else {
                     btn.disabled = false;
                     alert(data.message || 'Something went wrong.');
                 }
             })
-            .catch(function () {
+            .catch(function (err) {
                 btn.disabled = false;
                 btn.textContent = 'PLACE ORDER';
-                alert('Something went wrong. Please try again.');
+                alert('Error: ' + err.message);
             });
+    }
+
+    /* ── CASH MODAL CLOSE ── */
+    function closeCashModal() {
+        document.getElementById('cashModal').classList.remove('open');
+        showSuccess(pendingOrderData.tableID, pendingOrderData.items, finalTotal);
     }
 
 function showSuccess(tableNum, lines, total) {
@@ -786,6 +1085,9 @@ document.addEventListener('DOMContentLoaded', function() {
     renderMenu();
     renderCart();
 });
+
+
+
 </script>
 </body>
 </html>

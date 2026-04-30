@@ -133,3 +133,8 @@ CREATE TABLE OrderItems (
 CREATE INDEX IX_Orders_TableDate ON Orders (TableID, CreatedAt);
 CREATE INDEX IX_Orders_User      ON Orders (UserID);
 CREATE INDEX IX_OrderItems_Order ON OrderItems (OrderID);   
+
+-- Add missing columns to Orders table
+ALTER TABLE Orders ADD ReferenceNo   NVARCHAR(20)  NULL;
+ALTER TABLE Orders ADD DiscountType  NVARCHAR(20)  NULL;  -- regular / pwd / senior / student
+ALTER TABLE Orders ADD PaymentMethod NVARCHAR(20)  NULL;  -- Cash / EWallet
