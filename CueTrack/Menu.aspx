@@ -290,7 +290,7 @@
     </style>
 </head>
 <body>
-<form id="form1" runat="server">
+<form id="form1" runat="server" onsubmit="return false;">
 
     <!-- LOGOUT MODAL -->
     <div class="modal-overlay" id="logoutModal">
@@ -307,8 +307,7 @@
             </div>
             <div class="modal-bdy">
                 <p style="font-size:14px;color:var(--muted);text-align:center;margin-bottom:20px;">You'll be returned to the login page.</p>
-                <asp:Button ID="btnLogout" runat="server" Text="YES, LOGOUT" CssClass="btn-danger" OnClick="BtnLogout_Click" />
-                <button type="button" class="btn-outline" onclick="closeLogout()">CANCEL</button>
+<asp:Button ID="btnLogout" runat="server" Text="YES, LOGOUT" CssClass="btn-danger" OnClick="BtnLogout_Click" OnClientClick="document.getElementById('form1').onsubmit=null;" />                <button type="button" class="btn-outline" onclick="closeLogout()">CANCEL</button>
             </div>
         </div>
     </div>
@@ -388,18 +387,18 @@
             </div>
 
             <!-- CATEGORY TABS -->
-            <div class="cat-tabs" id="catTabs">
-                <div class="cat-tab active" onclick="filterCat('all')">All Items</div>
-                <div class="cat-tab" onclick="filterCat('cocktails')">🍹 Cocktails</div>
-                <div class="cat-tab" onclick="filterCat('beer')">🍺 Beer</div>
-                <div class="cat-tab" onclick="filterCat('whiskey')">🥃 Whiskey</div>
-                <div class="cat-tab" onclick="filterCat('shots')">🍸 Shots & Mixed</div>
-                <div class="cat-tab" onclick="filterCat('wine')">🍷 Wine & Liqueur</div>
-                <div class="cat-tab" onclick="filterCat('brandy')">🥂 Brandy</div>
-                <div class="cat-tab" onclick="filterCat('beverages')">☕ Beverages</div>
-                <div class="cat-tab" onclick="filterCat('food')">🍽️ Food</div>
-                <div class="cat-tab" onclick="filterCat('snacks')">🍟 Snacks</div>
-            </div>
+<div class="cat-tabs" id="catTabs">
+    <div class="cat-tab active" onclick="filterCat('all', this)">All Items</div>
+    <div class="cat-tab" onclick="filterCat('cocktails', this)">🍹 Cocktails</div>
+    <div class="cat-tab" onclick="filterCat('beer', this)">🍺 Beer</div>
+    <div class="cat-tab" onclick="filterCat('whiskey', this)">🥃 Whiskey</div>
+    <div class="cat-tab" onclick="filterCat('shots', this)">🍸 Shots & Mixed</div>
+    <div class="cat-tab" onclick="filterCat('wine', this)">🍷 Wine & Liqueur</div>
+    <div class="cat-tab" onclick="filterCat('brandy', this)">🥂 Brandy</div>
+    <div class="cat-tab" onclick="filterCat('beverages', this)">☕ Beverages</div>
+    <div class="cat-tab" onclick="filterCat('food', this)">🍽️ Food</div>
+    <div class="cat-tab" onclick="filterCat('snacks', this)">🍟 Snacks</div>
+</div>
 
             <!-- MENU ITEMS rendered by JS -->
             <div id="menuContainer"></div>
@@ -450,14 +449,10 @@
             <button type="button" class="btn-orange" id="placeOrderBtn" onclick="placeOrder()" disabled>PLACE ORDER</button>
             <button type="button" class="btn-clear" onclick="clearCart()">CLEAR CART</button>
 
-            <!-- Hidden for postback -->
-            <asp:HiddenField ID="hdnOrderJson" runat="server" />
-            <asp:HiddenField ID="hdnOrderTable" runat="server" />
-            <asp:HiddenField ID="hdnOrderNotes" runat="server" />
-            <asp:HiddenField ID="hdnOrderTotal" runat="server" />
-            <asp:Button ID="btnSubmitOrder" runat="server" style="display:none" OnClick="BtnSubmitOrder_Click" />
+          
         </div>
     </div>
+
 </form>
 
 <script>
@@ -614,19 +609,18 @@ function renderMenu() {
             + (item.desc ? '<div class="menu-card-desc">' + item.desc + '</div>' : '')
             + '<div class="menu-card-footer">'
             + '<div class="menu-card-price">₱' + item.price.toLocaleString() + '</div>'
-            + '<button class="menu-card-add" onclick="addToCart(\'' + item.id + '\', event)">+</button>'
-            + '</div></div>';
+        + '<button type="button" class="menu-card-add" onclick="addToCart(\'' + item.id + '\', event)">+</button>'            + '</div></div>';
         gridEl.appendChild(card);
     });
 }
 
 /* ── FILTER ── */
-function filterCat(cat) {
-    activeFilter = cat;
-    document.querySelectorAll('.cat-tab').forEach(function(t) { t.classList.remove('active'); });
-    event.target.classList.add('active');
-    renderMenu();
-}
+    function filterCat(cat, el) {
+        activeFilter = cat;
+        document.querySelectorAll('.cat-tab').forEach(function (t) { t.classList.remove('active'); });
+        el.classList.add('active');
+        renderMenu();
+    }
 
 /* ── CART OPERATIONS ── */
 function addToCart(id, e) {
@@ -690,9 +684,9 @@ function renderCart() {
             + '<div class="cart-item-price">₱' + entry.item.price.toLocaleString() + ' × ' + entry.qty + ' = ₱' + lineTotal.toLocaleString() + '</div>'
             + '</div>'
             + '<div class="cart-item-controls">'
-            + '<button class="ctrl-btn remove" onclick="removeFromCart(\'' + id + '\')">−</button>'
-            + '<span class="ctrl-qty">' + entry.qty + '</span>'
-            + '<button class="ctrl-btn" onclick="addToCart(\'' + id + '\')">+</button>'
+        + '<button type="button" class="ctrl-btn remove" onclick="removeFromCart(\'' + id + '\')">−</button>'
+        + '<span class="ctrl-qty">' + entry.qty + '</span>'
+        + '<button type="button" class="ctrl-btn" onclick="addToCart(\'' + id + '\')">+</button>'
             + '</div>';
         cartEl.insertBefore(row, emptyEl);
     });
@@ -711,27 +705,48 @@ function clearCart() {
 }
 
 /* ── PLACE ORDER ── */
-function placeOrder() {
-    var tableEl = document.getElementById('tableSelect');
-    if (!tableEl.value) { alert('Please select your table number.'); return; }
+    function placeOrder() {
+        var tableEl = document.getElementById('tableSelect');
+        if (!tableEl.value) { alert('Please select your table number.'); return; }
 
-    var orderLines = Object.keys(cart).map(function(id) {
-        var e = cart[id];
-        return { id: id, name: e.item.name, price: e.item.price, qty: e.qty };
-    });
+        var orderLines = Object.keys(cart).map(function (id) {
+            var e = cart[id];
+            return { id: id, name: e.item.name, price: e.item.price, qty: e.qty };
+        });
 
-    var total = orderLines.reduce(function(sum, l) { return sum + l.price * l.qty; }, 0);
-    var notes = document.getElementById('orderNotes').value.trim();
+        var total = orderLines.reduce(function (s, l) { return s + l.price * l.qty; }, 0);
+        var notes = document.getElementById('orderNotes').value.trim();
 
-    document.getElementById('hdnOrderJson').value = JSON.stringify(orderLines);
-    document.getElementById('hdnOrderTable').value = tableEl.value;
-    document.getElementById('hdnOrderNotes').value = notes;
-    document.getElementById('hdnOrderTotal').value = total;
+        var btn = document.getElementById('placeOrderBtn');
+        btn.disabled = true;
+        btn.textContent = 'SENDING...';
 
-    // Show success immediately (optimistic UI), then submit
-    showSuccess(tableEl.value, orderLines, total);
-    document.getElementById('btnSubmitOrder').click();
-}
+        fetch('OrderHandler.ashx', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                tableID: tableEl.value,
+                notes: notes,
+                total: total,
+                items: orderLines
+            })
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                btn.textContent = 'PLACE ORDER';
+                if (data.success) {
+                    showSuccess(tableEl.value, orderLines, total);
+                } else {
+                    btn.disabled = false;
+                    alert(data.message || 'Something went wrong.');
+                }
+            })
+            .catch(function () {
+                btn.disabled = false;
+                btn.textContent = 'PLACE ORDER';
+                alert('Something went wrong. Please try again.');
+            });
+    }
 
 function showSuccess(tableNum, lines, total) {
     var html = '';

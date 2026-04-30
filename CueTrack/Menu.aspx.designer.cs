@@ -60,51 +60,6 @@ namespace CueTrack
         protected global::System.Web.UI.WebControls.Literal litUserEmail;
 
         /// <summary>
-        /// hdnOrderJson control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hdnOrderJson;
-
-        /// <summary>
-        /// hdnOrderTable control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hdnOrderTable;
-
-        /// <summary>
-        /// hdnOrderNotes control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hdnOrderNotes;
-
-        /// <summary>
-        /// hdnOrderTotal control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hdnOrderTotal;
-
-        /// <summary>
-        /// btnSubmitOrder control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnSubmitOrder;
-
-        /// <summary>
         /// litSession control.
         /// </summary>
         /// <remarks>
